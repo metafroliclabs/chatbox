@@ -1,0 +1,26 @@
+{
+    "name": "metafroliclabs/laravel-chat",
+    "description": "This is a complete laravel chat application package for our organization.",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Metafroliclabs\\LaravelChat\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Wasif Raza",
+            "email": "wasif.raza@metafroliclabs.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Metafroliclabs\\LaravelChat\\ChatServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "require": {}
+}
