@@ -3,6 +3,8 @@
 namespace Metafroliclabs\LaravelChat;
 
 use Illuminate\Support\ServiceProvider;
+use Metafroliclabs\LaravelChat\Contracts\ChatResponseContract;
+use Metafroliclabs\LaravelChat\Services\ChatResponseService;
 
 class ChatServiceProvider extends ServiceProvider
 {
@@ -11,7 +13,7 @@ class ChatServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(ChatResponseContract::class, ChatResponseService::class);
     }
 
     /**

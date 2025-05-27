@@ -4,6 +4,7 @@ namespace Metafroliclabs\LaravelChat\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Metafroliclabs\LaravelChat\Contracts\ChatResponseContract;
 use Metafroliclabs\LaravelChat\Http\Requests\MessageRequest;
 use Metafroliclabs\LaravelChat\Http\Resources\ChatResource;
 use Metafroliclabs\LaravelChat\Http\Resources\MessageResource;
@@ -11,6 +12,13 @@ use Metafroliclabs\LaravelChat\Models\Chat;
 
 class ChatController extends Controller
 {
+    protected $response;
+
+    public function __construct(ChatResponseContract $response)
+    {
+        $this->response = $response;
+    }
+
     public function create_chat(Request $request)
     {
         $request->validate(['user_id' => 'required|exists:users,id']);
@@ -25,7 +33,7 @@ class ChatController extends Controller
             ->first();
 
         if ($chat)
-            return response()->json(new ChatResource($chat));
+            return $this->response->success(new ChatResource($chat));
 
         DB::beginTransaction();
         $newChat = Chat::create(['type' => Chat::PRIVATE]);
@@ -42,7 +50,7 @@ class ChatController extends Controller
             'updated_at' => now()
         ]);
         DB::commit();
-        return response()->json(new ChatResource($newChat));
+        return $this->response->success(new ChatResource($newChat));
     }
 
     public function get_unread_count()
@@ -55,7 +63,7 @@ class ChatController extends Controller
                 $q->whereNull('read_at')->where('user_id', '!=', auth()->id());
             })
             ->count();
-        return response()->json(['count' => $count]);
+        return $this->response->success(['count' => $count]);
     }
 
     public function get_unread_chats(Request $request)
@@ -91,7 +99,7 @@ class ChatController extends Controller
             })
             ->get();
 
-        return response()->json(ChatResource::collection($chats));
+        return $this->response->success(ChatResource::collection($chats));
     }
 
     public function get_chat_list(Request $request)
@@ -124,7 +132,7 @@ class ChatController extends Controller
             })
             ->get();
 
-        return response()->json(ChatResource::collection($chats));
+        return $this->response->success(ChatResource::collection($chats));
     }
 
     public function get_chat($id)
@@ -138,7 +146,7 @@ class ChatController extends Controller
         $chat->messages()->whereNull('read_at')->where('user_id', '!=', auth()->id())->update(['read_at' => now()]);
 
         $messages = $chat->messages()->latest()->get();
-        return response()->json(MessageResource::collection($messages));
+        return $this->response->success(MessageResource::collection($messages));
     }
 
     public function send_message(MessageRequest $request, $id)
@@ -156,6 +164,6 @@ class ChatController extends Controller
         ]);
         // DB::commit();
 
-        return response()->json(new MessageResource($message));
+        return $this->response->success(new MessageResource($message));
     }
 }
