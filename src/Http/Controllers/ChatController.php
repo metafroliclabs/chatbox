@@ -60,7 +60,7 @@ class ChatController extends Controller
 
     public function get_unread_chats(Request $request)
     {
-        $chats = Chat::with('users', 'users.shop', 'messages')
+        $chats = Chat::with('users', 'messages')
             ->whereHas('users', function ($q) {
                 $q->where('user_id', auth()->id());
             })
@@ -96,7 +96,7 @@ class ChatController extends Controller
 
     public function get_chat_list(Request $request)
     {
-        $chats = Chat::with('users', 'users.shop', 'messages')
+        $chats = Chat::with('users', 'messages')
             ->whereHas('users', function ($q) {
                 $q->where('user_id', auth()->id());
             })
@@ -129,7 +129,7 @@ class ChatController extends Controller
 
     public function get_chat($id)
     {
-        $chat = Chat::with('users', 'messages', 'messages.attachment')
+        $chat = Chat::with('users', 'messages')
             ->whereHas('users', function ($q) {
                 $q->where('user_id', auth()->id());
             })
