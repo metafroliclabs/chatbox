@@ -29,7 +29,7 @@ class ChatServiceProvider extends ServiceProvider
 
         // Config
         $this->publishes([
-            __DIR__ . '/config/chat.php' => config_path('chat.php')
+            __DIR__ . '/../config/chat.php' => config_path('chat.php')
         ], 'chat-config');
     }
 }
