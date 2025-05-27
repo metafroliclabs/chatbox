@@ -2,7 +2,7 @@
 
 namespace Metafroliclabs\LaravelChat\Http\Resources;
 
-use App\Models\Chat;
+use Metafroliclabs\LaravelChat\Models\Chat;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
