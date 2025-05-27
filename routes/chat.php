@@ -14,11 +14,16 @@ use Metafroliclabs\LaravelChat\Http\Controllers\ChatController;
 |
 */
 
-Route::controller(ChatController::class)->group(function () {
-    Route::post('/chat/create', 'create_chat');
-    Route::get('/chat/unread/count', 'get_unread_count');
-    Route::get('/chat/unread/list', 'get_unread_chats');
-    Route::get('/chat/all/list', 'get_chat_list');
-    Route::get('/chat/{id}', 'get_chat');
-    Route::post('/chat/{id}/send', 'send_message');
+
+Route::middleware(config('chat.middleware'))->prefix(config('chat.prefix'))->group(function () {
+
+    Route::controller(ChatController::class)->group(function () {
+        Route::post('/create', 'create_chat');
+        Route::get('/unread/count', 'get_unread_count');
+        Route::get('/unread/list', 'get_unread_chats');
+        Route::get('/all/list', 'get_chat_list');
+        Route::get('/{id}', 'get_chat');
+        Route::post('/{id}/send', 'send_message');
+    });
+    
 });

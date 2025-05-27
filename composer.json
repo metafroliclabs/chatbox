@@ -2,6 +2,13 @@
     "name": "metafroliclabs/laravel-chat",
     "description": "This is a complete laravel chat application package for our organization.",
     "type": "library",
+    "keywords": [
+        "laravel",
+        "messenger",
+        "conversations",
+        "chat",
+        "php"
+      ],
     "license": "MIT",
     "autoload": {
         "psr-4": {
@@ -21,6 +28,7 @@
             ]
         }
     },
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
+    "prefer-stable": true,
     "require": {}
 }
