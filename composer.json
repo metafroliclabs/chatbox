@@ -26,6 +26,9 @@
             "providers": [
                 "Metafroliclabs\\LaravelChat\\ChatServiceProvider"
             ]
+        },
+        "branch-alias": {
+            "dev-main": "1.0.x-dev"
         }
     },
     "minimum-stability": "dev",
