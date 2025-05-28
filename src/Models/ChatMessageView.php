@@ -6,20 +6,19 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ChatUser extends Model
+class ChatMessageView extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'chat_id',
+        'chat_message_id',
         'user_id',
-        'role',
     ];
 
     // Relations
-    public function chat()
+    public function message()
     {
-        return $this->belongsTo(Chat::class);
+        return $this->belongsTo(ChatMessage::class);
     }
 
     public function user()

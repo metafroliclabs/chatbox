@@ -16,18 +16,36 @@ class Chat extends Model
     protected $fillable = [
         'type',
         'name',
-        'image'
+        'image',
+        'created_by'
     ];
 
-    // Relationship
-    public function messages()
+    protected $with = ['users', 'messages', 'setting'];
+
+    // Relations
+    public function createdBy()
     {
-        return $this->hasMany(ChatMessage::class);
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function setting()
+    {
+        return $this->hasOne(ChatSetting::class);
     }
 
     public function users()
     {
-        return $this->belongsToMany(User::class, 'chat_users');
+        return $this->belongsToMany(User::class, 'chat_users')->withPivot('is_admin');
+    }
+    
+    // public function users()
+    // {
+    //     return $this->hasMany(ChatUser::class);
+    // }
+
+    public function messages()
+    {
+        return $this->hasMany(ChatMessage::class);
     }
 
     // Accessors

@@ -13,9 +13,10 @@ return new class extends Migration
     {
         Schema::create('chats', function (Blueprint $table) {
             $table->id();
-            $table->enum("type", ["private", "group"])->default("private");
-            $table->string("name")->nullable();
-            $table->string("image")->nullable();
+            $table->enum('type', ['private', 'group'])->default('private');
+            $table->string('name')->nullable();
+            $table->string('image')->nullable();
+            $table->unsignedInteger('created_by')->nullable();
             $table->timestamps();
         });
     }
