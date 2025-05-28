@@ -1,13 +1,13 @@
 <?php
 
-namespace Metafroliclabs\LaravelChat\Http\Controllers;
+namespace Metafroliclabs\LaravelChat\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Metafroliclabs\LaravelChat\Contracts\ChatResponseContract;
-use Metafroliclabs\LaravelChat\Http\Requests\MessageRequest;
-use Metafroliclabs\LaravelChat\Http\Resources\ChatResource;
-use Metafroliclabs\LaravelChat\Http\Resources\MessageResource;
+use Metafroliclabs\LaravelChat\Requests\MessageRequest;
+use Metafroliclabs\LaravelChat\Resources\ChatResource;
+use Metafroliclabs\LaravelChat\Resources\MessageResource;
 use Metafroliclabs\LaravelChat\Models\Chat;
 
 class ChatController extends Controller

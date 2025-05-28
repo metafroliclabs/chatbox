@@ -14,6 +14,8 @@ class ChatServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(ChatResponseContract::class, ChatResponseService::class);
+
+        $this->mergeConfigFrom(__DIR__.'/../config/chat.php', 'chat');
     }
 
     /**

@@ -1,6 +1,6 @@
 <?php
 
-namespace Metafroliclabs\LaravelChat\Http\Requests;
+namespace Metafroliclabs\LaravelChat\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 

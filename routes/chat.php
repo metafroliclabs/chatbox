@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Metafroliclabs\LaravelChat\Http\Controllers\ChatController;
+use Metafroliclabs\LaravelChat\Controllers\ChatController;
 
 /*
 |--------------------------------------------------------------------------

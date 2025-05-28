@@ -1,6 +1,6 @@
 <?php
 
-namespace Metafroliclabs\LaravelChat\Http\Resources;
+namespace Metafroliclabs\LaravelChat\Resources;
 
 use Metafroliclabs\LaravelChat\Models\Chat;
 use Illuminate\Http\Request;
@@ -22,7 +22,6 @@ class ChatResource extends JsonResource
             'id' => $this->id,
             'type' => $this->type,
             'name' => $this->when($private, $user->first_name . " " . $user->last_name, $this->name),
-            'shop_name' => $this->when($private, $user->shop?->name, null),
             'image' => $this->when($private, $user->avatar, $this->image),
             'unread' => $this->messages()->whereNull('read_at')->whereNot('user_id', auth()->id())->count(),
             'last_message' => new MessageResource($this->messages->last()),

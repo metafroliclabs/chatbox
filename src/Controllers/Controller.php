@@ -1,6 +1,6 @@
 <?php
 
-namespace Metafroliclabs\LaravelChat\Http\Controllers;
+namespace Metafroliclabs\LaravelChat\Controllers;
 
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Foundation\Validation\ValidatesRequests;

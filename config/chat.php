@@ -29,9 +29,5 @@ return [
     |
     */
 
-    'name_cols_in_users_table' => [
-        'name',
-        // 'first_name',
-        // 'last_name',
-    ],
+    'user_name_cols' => ['first_name', 'last_name'],
 ];

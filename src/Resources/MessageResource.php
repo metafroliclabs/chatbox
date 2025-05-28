@@ -1,6 +1,6 @@
 <?php
 
-namespace Metafroliclabs\LaravelChat\Http\Resources;
+namespace Metafroliclabs\LaravelChat\Resources;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -21,9 +21,8 @@ class MessageResource extends JsonResource
             'user_name' => $this->user->first_name . " " . $this->user->last_name,
             'message' => $this->message,
             'read_at' => $this->read_at,
-            'date' => $this->created_at?->format('d/m/Y'),
             'created_at' => $this->created_at,
-            'attachment' => $this->attachment,
+            // 'attachment' => $this->attachment,
         ];
     }
 }
