@@ -5,6 +5,7 @@ namespace Metafroliclabs\LaravelChat;
 use Illuminate\Support\ServiceProvider;
 use Metafroliclabs\LaravelChat\Contracts\ChatResponseContract;
 use Metafroliclabs\LaravelChat\Services\ChatResponseService;
+use Metafroliclabs\LaravelChat\Services\FileService;
 
 class ChatServiceProvider extends ServiceProvider
 {
@@ -14,6 +15,8 @@ class ChatServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(ChatResponseContract::class, ChatResponseService::class);
+
+        $this->app->singleton(FileService::class);
 
         $this->mergeConfigFrom(__DIR__.'/../config/chat.php', 'chat');
     }

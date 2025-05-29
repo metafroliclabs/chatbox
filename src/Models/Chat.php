@@ -13,6 +13,9 @@ class Chat extends Model
     public const PRIVATE = "private";
     public const GROUP = "group";
 
+    public const ADMIN = "admin";
+    public const USER = "user";
+
     protected $fillable = [
         'type',
         'name',
@@ -35,7 +38,7 @@ class Chat extends Model
 
     public function users()
     {
-        return $this->belongsToMany(User::class, 'chat_users')->withPivot('is_admin');
+        return $this->belongsToMany(User::class, 'chat_users')->withPivot('role');
     }
     
     // public function users()

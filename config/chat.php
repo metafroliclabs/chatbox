@@ -30,4 +30,16 @@ return [
     */
 
     'user_name_cols' => ['first_name', 'last_name'],
+
+    /*
+    |-------------------------------------
+    | File service configurations
+    |-------------------------------------
+    */
+
+    'file' => [
+        'disk' => env('CHAT_FILE_DISK', 'public'),
+        'upload_folder' => 'attachments',
+        'default_prefix' => 'File',
+    ],
 ];
