@@ -1,6 +1,6 @@
 <?php
 
-namespace Metafroliclabs\LaravelChat\Services;
+namespace Metafroliclabs\LaravelChat\Services\Core;
 
 use Illuminate\Http\JsonResponse;
 use Metafroliclabs\LaravelChat\Contracts\ChatResponseContract;

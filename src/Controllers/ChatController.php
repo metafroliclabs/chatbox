@@ -3,167 +3,57 @@
 namespace Metafroliclabs\LaravelChat\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Metafroliclabs\LaravelChat\Contracts\ChatResponseContract;
-use Metafroliclabs\LaravelChat\Requests\MessageRequest;
 use Metafroliclabs\LaravelChat\Resources\ChatResource;
-use Metafroliclabs\LaravelChat\Resources\MessageResource;
-use Metafroliclabs\LaravelChat\Models\Chat;
+use Metafroliclabs\LaravelChat\Requests\CreateGroupRequest;
+use Metafroliclabs\LaravelChat\Services\ChatService;
 
 class ChatController extends Controller
 {
+    public $chatService;
     protected $response;
 
-    public function __construct(ChatResponseContract $response)
+    public function __construct(ChatResponseContract $response, ChatService $chatService)
     {
+        $this->chatService = $chatService;
         $this->response = $response;
     }
 
-    public function create_chat(Request $request)
+    public function index(Request $request)
+    {
+        $chats = $this->chatService->get_chat_list($request);
+        return $this->response->success(ChatResource::collection($chats));
+    }
+
+    public function unread_list(Request $request)
+    {
+        $chats = $this->chatService->get_unread_chat_list($request);
+        return $this->response->success(ChatResource::collection($chats));
+    }
+
+    public function unread_count()
+    {
+        $count = $this->chatService->get_unread_chat_count();
+        return $this->response->success(["count" => $count]);
+    }
+    
+    public function create(Request $request)
     {
         $request->validate(['user_id' => 'required|exists:users,id']);
 
-        $chat = Chat::with('users')
-            ->whereHas('users', function ($query) {
-                $query->where('user_id', auth()->id());
-            })
-            ->whereHas('users', function ($query) use ($request) {
-                $query->where('user_id', $request->user_id);
-            })
-            ->first();
-
-        if ($chat)
-            return $this->response->success(new ChatResource($chat));
-
-        DB::beginTransaction();
-        $newChat = Chat::create(['type' => Chat::PRIVATE]);
-
-        $newChat->users()->attach(auth()->id(), [
-            'is_admin'   => false,
-            'created_at' => now(),
-            'updated_at' => now()
-        ]);
-
-        $newChat->users()->attach($request->user_id, [
-            'is_admin'   => false,
-            'created_at' => now(),
-            'updated_at' => now()
-        ]);
-        DB::commit();
-        return $this->response->success(new ChatResource($newChat));
+        $chat = $this->chatService->create_chat($request);
+        return $this->response->success(new ChatResource($chat));
     }
 
-    public function get_unread_count()
+    public function create_group(CreateGroupRequest $request)
     {
-        $count = Chat::with('users', 'messages')
-            ->whereHas('users', function ($q) {
-                $q->where('user_id', auth()->id());
-            })
-            ->whereHas('messages', function ($q) {
-                $q->whereNull('read_at')->where('user_id', '!=', auth()->id());
-            })
-            ->count();
-        return $this->response->success(['count' => $count]);
+        $chat = $this->chatService->create_chat_group($request);
+        return $this->response->success(new ChatResource($chat));
     }
 
-    public function get_unread_chats(Request $request)
+    public function leave($id)
     {
-        $chats = Chat::with('users', 'messages')
-            ->whereHas('users', function ($q) {
-                $q->where('user_id', auth()->id());
-            })
-            ->whereHas('messages', function ($q) {
-                $q->whereNull('read_at')->where('user_id', '!=', auth()->id());
-            })
-            ->when($request->filled('search'), function ($q) use ($request) {
-                $q->where(function ($query) use ($request) {
-                    $query->where(function ($subquery) use ($request) {
-                        $subquery->where('type', Chat::PRIVATE)
-                            ->whereHas('users', function ($subquery2) use ($request) {
-                                $subquery2->where(DB::raw('concat(first_name," ",last_name)'), 'like', '%' . $request->search . '%');
-                            });
-                    })
-                        ->orWhere('name', 'like', '%' . $request->search . '%');
-                });
-            })
-            ->when($request->filled('type'), function ($q) use ($request) {
-                $q->where('type', $request->type);
-            })
-            ->orderBy('created_at', 'desc')
-            ->orderByDesc(function ($q) {
-                $q->select('created_at')
-                    ->from('chat_messages')
-                    ->whereColumn('chat_id', 'chats.id')
-                    ->orderBy('created_at', 'desc')
-                    ->limit(1);
-            })
-            ->get();
-
-        return $this->response->success(ChatResource::collection($chats));
-    }
-
-    public function get_chat_list(Request $request)
-    {
-        $chats = Chat::with('users', 'messages')
-            ->whereHas('users', function ($q) {
-                $q->where('user_id', auth()->id());
-            })
-            ->when($request->filled('search'), function ($q) use ($request) {
-                $q->where(function ($query) use ($request) {
-                    $query->where(function ($subquery) use ($request) {
-                        $subquery->where('type', Chat::PRIVATE)
-                            ->whereHas('users', function ($subquery2) use ($request) {
-                                $subquery2->where(DB::raw('concat(first_name," ",last_name)'), 'like', '%' . $request->search . '%');
-                            });
-                    })
-                        ->orWhere('name', 'like', '%' . $request->search . '%');
-                });
-            })
-            ->when($request->filled('type'), function ($q) use ($request) {
-                $q->where('type', $request->type);
-            })
-            ->orderBy('created_at', 'desc')
-            ->orderByDesc(function ($q) {
-                $q->select('created_at')
-                    ->from('chat_messages')
-                    ->whereColumn('chat_id', 'chats.id')
-                    ->orderBy('created_at', 'desc')
-                    ->limit(1);
-            })
-            ->get();
-
-        return $this->response->success(ChatResource::collection($chats));
-    }
-
-    public function get_chat($id)
-    {
-        $chat = Chat::with('users', 'messages')
-            ->whereHas('users', function ($q) {
-                $q->where('user_id', auth()->id());
-            })
-            ->findOrFail($id);
-
-        $chat->messages()->whereNull('read_at')->where('user_id', '!=', auth()->id())->update(['read_at' => now()]);
-
-        $messages = $chat->messages()->latest()->get();
-        return $this->response->success(MessageResource::collection($messages));
-    }
-
-    public function send_message(MessageRequest $request, $id)
-    {
-        $chat = Chat::with('users')->whereHas('users', function ($q) {
-            $q->where('user_id', auth()->id());
-        })->findOrFail($id);
-
-        $chat->messages()->whereNull('read_at')->where('user_id', '!=', auth()->id())->update(['read_at' => now()]);
-
-        // DB::beginTransaction();
-        $message = $chat->messages()->create([
-            'user_id' => auth()->id(),
-            'message' => $request->message ?? null,
-        ]);
-        // DB::commit();
-
-        return $this->response->success(new MessageResource($message));
+        $chat = $this->chatService->leave_chat_group($id);
+        return $this->response->success(["message" => "Group left successfully"]);
     }
 }

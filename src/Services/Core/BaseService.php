@@ -1,6 +1,6 @@
 <?php
 
-namespace Metafroliclabs\LaravelChat\Services;
+namespace Metafroliclabs\LaravelChat\Services\Core;
 
 class BaseService
 {

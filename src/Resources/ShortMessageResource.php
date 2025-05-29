@@ -5,7 +5,7 @@ namespace Metafroliclabs\LaravelChat\Resources;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class MessageResource extends JsonResource
+class ShortMessageResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -21,10 +21,6 @@ class MessageResource extends JsonResource
             'deleted_at' => $this->deleted_at,
             'created_at' => $this->created_at,
             'user' => $this->user,
-            'repliedTo' => new ShortMessageResource($this->repliedTo),
-            'attachment' => $this->attachment,
-            'reactions' => $this->reactions,
-            'views' => $this->views,
         ];
     }
 }

@@ -16,14 +16,26 @@ use Metafroliclabs\LaravelChat\Controllers\ChatController;
 
 
 Route::middleware(config('chat.middleware'))->prefix(config('chat.prefix'))->group(function () {
+    Route::get('/all/list', [ChatController::class, 'index']);
+    Route::get('/unread/list', [ChatController::class, 'unread_list']);
+    Route::get('/unread/count', [ChatController::class, 'unread_count']);
 
-    Route::controller(ChatController::class)->group(function () {
-        Route::post('/create', 'create_chat');
-        Route::get('/unread/count', 'get_unread_count');
-        Route::get('/unread/list', 'get_unread_chats');
-        Route::get('/all/list', 'get_chat_list');
-        Route::get('/{id}', 'get_chat');
-        Route::post('/{id}/send', 'send_message');
-    });
-    
+    Route::post('/create', [ChatController::class, 'create']);
+    Route::post('/create/group', [ChatController::class, 'create_group']);
+    // Route::post('/{id}/update', [ChatController::class, 'update']);
+    // Route::post('/{id}/delete', [ChatController::class, 'delete']);
+    Route::post('/{id}/leave', [ChatController::class, 'leave']);
+
+    // Route::get('/{id}/users', [ChatController::class, 'get_users']);
+    // Route::post('/{id}/users/add', [ChatController::class, 'add_users']);
+    // Route::post('/{id}/users/remove', [ChatController::class, 'remove_users']);
+    // Route::post('/{id}/users/{uid}/admin', [ChatController::class, 'manage_admin']);
+
+    Route::get('/{id}/messages', [ChatMessageController::class, 'index']);
+    Route::post('/{id}/messages', [ChatMessageController::class, 'send_message']);
+    // Route::get('/{id}/messages/{mid}/likes', [ChatMessageController::class, 'get_likes']);
+    // Route::post('/{id}/messages/{mid}/like', [ChatMessageController::class, 'like_message']);
+    // Route::get('/{id}/messages/{mid}/views', [ChatMessageController::class, 'get_views']);
+    // Route::post('/{id}/messages/{mid}/update', [ChatMessageController::class, 'update_message']);
+    // Route::post('/{id}/messages/{mid}/delete', [ChatMessageController::class, 'delete_message']);
 });

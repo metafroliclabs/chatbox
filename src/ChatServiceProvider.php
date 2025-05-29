@@ -4,8 +4,8 @@ namespace Metafroliclabs\LaravelChat;
 
 use Illuminate\Support\ServiceProvider;
 use Metafroliclabs\LaravelChat\Contracts\ChatResponseContract;
-use Metafroliclabs\LaravelChat\Services\ChatResponseService;
-use Metafroliclabs\LaravelChat\Services\FileService;
+use Metafroliclabs\LaravelChat\Services\Core\ChatResponseService;
+use Metafroliclabs\LaravelChat\Services\Core\FileService;
 
 class ChatServiceProvider extends ServiceProvider
 {

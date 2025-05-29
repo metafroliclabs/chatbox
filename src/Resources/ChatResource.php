@@ -18,13 +18,20 @@ class ChatResource extends JsonResource
         $user = $this->users->where('id', '!=', auth()->id())->first();
         $private = ($this->type === Chat::PRIVATE) ? true : false;
 
+        // unread messages count
+        $count = $this->messages
+        ->where('user_id', '!=', auth()->id())
+        ->reject(fn($message) => $message->views->where('user_id', auth()->id())->isNotEmpty())
+        ->count();
+
         return [
             'id' => $this->id,
             'type' => $this->type,
-            'name' => $this->when($private, $user->first_name . " " . $user->last_name, $this->name),
+            'name' => $this->when($private, $user->full_name, $this->name),
             'image' => $this->when($private, $user->avatar, $this->image),
-            'unread' => $this->messages()->whereNull('read_at')->whereNot('user_id', auth()->id())->count(),
-            'last_message' => new MessageResource($this->messages->last()),
+            'unread' => $count,
+            'last_message' => new ShortMessageResource($this->messages->last()),
+            'setting' => $this->setting
         ];
     }
 }
