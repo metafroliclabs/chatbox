@@ -3,23 +3,21 @@
 namespace Metafroliclabs\LaravelChat\Controllers;
 
 use Illuminate\Http\Request;
-use Metafroliclabs\LaravelChat\Contracts\ChatResponseContract;
 use Metafroliclabs\LaravelChat\Requests\MessageRequest;
 use Metafroliclabs\LaravelChat\Resources\MessageResource;
 use Metafroliclabs\LaravelChat\Services\ChatMessageService;
 use Metafroliclabs\LaravelChat\Services\ChatService;
 
-class ChatMessageController extends Controller
+class ChatMessageController extends BaseController
 {
     public $chatService;
     public $messageService;
-    protected $response;
 
-    public function __construct(ChatResponseContract $response, ChatMessageService $messageService, ChatService $chatService)
+    public function __construct(ChatMessageService $messageService, ChatService $chatService)
     {
+        parent::__construct();
         $this->chatService = $chatService;
         $this->messageService = $messageService;
-        $this->response = $response;
     }
 
     public function index($id)

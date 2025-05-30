@@ -2,6 +2,7 @@
 
 namespace Metafroliclabs\LaravelChat\Services;
 
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Metafroliclabs\LaravelChat\Models\Chat;
 use Metafroliclabs\LaravelChat\Models\ChatMessage;
@@ -142,6 +143,10 @@ class ChatService extends BaseService
         $authId = auth()->id();
         $userId = $request->user_id;
 
+        if ($authId == $userId) {
+            throw new Exception("Trying to create a chat with invalid user id.");
+        }
+
         $chat = Chat::whereHas('users', function ($query) use ($authId) {
             $query->where('user_id', $authId);
         })
@@ -237,6 +242,24 @@ class ChatService extends BaseService
                 }
             }
         }
+
+        return $chat;
+    }
+
+    public function clear_chat($id)
+    {
+        $userId = auth()->id();
+
+        $chat = Chat::where('type', Chat::GROUP)
+            ->whereHas('users', function ($q) use ($userId) {
+                $q->where('user_id', $userId);
+            })
+            ->findOrFail($id);
+
+
+        $chat->users()->updateExistingPivot($userId, [
+            'cleared_at' => now()
+        ]);
 
         return $chat;
     }

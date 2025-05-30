@@ -3,20 +3,18 @@
 namespace Metafroliclabs\LaravelChat\Controllers;
 
 use Illuminate\Http\Request;
-use Metafroliclabs\LaravelChat\Contracts\ChatResponseContract;
 use Metafroliclabs\LaravelChat\Resources\ChatResource;
 use Metafroliclabs\LaravelChat\Requests\CreateGroupRequest;
 use Metafroliclabs\LaravelChat\Services\ChatService;
 
-class ChatController extends Controller
+class ChatController extends BaseController
 {
     public $chatService;
-    protected $response;
 
-    public function __construct(ChatResponseContract $response, ChatService $chatService)
+    public function __construct(ChatService $chatService)
     {
+        parent::__construct();
         $this->chatService = $chatService;
-        $this->response = $response;
     }
 
     public function index(Request $request)
@@ -55,5 +53,11 @@ class ChatController extends Controller
     {
         $chat = $this->chatService->leave_chat_group($id);
         return $this->response->success(["message" => "Group left successfully"]);
+    }
+
+    public function delete($id)
+    {
+        $chat = $this->chatService->clear_chat($id);
+        return $this->response->success(["message" => "Chat has been deleted successfully"]);
     }
 }
