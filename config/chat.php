@@ -30,6 +30,8 @@ return [
     |
     */
 
+    'user_image_url' => true,
+    'user_image_col' => 'avatar',
     'user_name_cols' => ['first_name', 'last_name'],
 
     /*

@@ -153,6 +153,7 @@ class ChatService extends BaseService
             ->whereHas('users', function ($query) use ($userId) {
                 $query->where('user_id', $userId);
             })
+            ->where('type', Chat::PRIVATE)
             ->first();
 
         if ($chat) return $chat;
@@ -182,7 +183,7 @@ class ChatService extends BaseService
         $chat = Chat::create([
             'type' => Chat::GROUP,
             'name' => $request->name,
-            'image' => $image['data'],
+            'image' => $image ? $image['data'] : $image,
             'created_by' => $authId
         ]);
 

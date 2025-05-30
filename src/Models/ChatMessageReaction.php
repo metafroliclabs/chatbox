@@ -16,6 +16,8 @@ class ChatMessageReaction extends Model
         'reaction_type',
     ];
 
+    protected $with = ['user'];
+
     // Relations
     public function message()
     {

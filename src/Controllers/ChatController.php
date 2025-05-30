@@ -3,17 +3,19 @@
 namespace Metafroliclabs\LaravelChat\Controllers;
 
 use Illuminate\Http\Request;
+use Metafroliclabs\LaravelChat\Contracts\ChatResponseContract;
 use Metafroliclabs\LaravelChat\Resources\ChatResource;
 use Metafroliclabs\LaravelChat\Requests\CreateGroupRequest;
 use Metafroliclabs\LaravelChat\Services\ChatService;
 
-class ChatController extends BaseController
+class ChatController extends Controller
 {
     public $chatService;
+    protected $response;
 
-    public function __construct(ChatService $chatService)
+    public function __construct(ChatResponseContract $response, ChatService $chatService)
     {
-        parent::__construct();
+        $this->response = $response;
         $this->chatService = $chatService;
     }
 

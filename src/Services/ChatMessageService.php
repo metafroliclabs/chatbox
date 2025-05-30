@@ -48,4 +48,24 @@ class ChatMessageService extends BaseService
 
         return $messages;
     }
+
+    public function getLikes($chat, $mid)
+    {
+        $message = $chat->messages()->findOrFail($mid);
+        return $message->reactions()->get();
+    }
+
+    public function toggleLike($chat, $mid)
+    {
+        $message = $chat->messages()->findOrFail($mid);
+        $isLiked = $message->reactions()->where('user_id', auth()->id())->first();
+        
+        if ($isLiked) {
+            $isLiked->delete();
+            return "Unliked successfully";
+        }
+
+        $message->reactions()->create(['user_id' => auth()->id()]);
+        return "Liked successfully";
+    }
 }
