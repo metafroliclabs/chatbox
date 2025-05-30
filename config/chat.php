@@ -17,7 +17,8 @@ return [
     |-------------------------------------
     */
 
-    'paginate_records' => env('CHAT_PAGINATE_RECORDS', 25),
+    'pagination' => true,
+    'pagination_records' => env('CHAT_PAGINATION_RECORDS', 25),
 
     /*
     |-------------------------------------

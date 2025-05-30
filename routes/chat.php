@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Metafroliclabs\LaravelChat\Controllers\ChatController;
+use Metafroliclabs\LaravelChat\Controllers\ChatMessageController;
 
 /*
 |--------------------------------------------------------------------------

@@ -5,10 +5,14 @@ namespace Metafroliclabs\LaravelChat\Services\Core;
 class BaseService
 {
     protected $pagination;
+    protected $per_page;
 
     public function __construct()
     {
-        $requestPerPage = config('chat.paginate_records', 25);
-        $this->pagination = $requestPerPage;
+        $pagination = config('chat.pagination', true);
+        $requestPerPage = config('chat.pagination_records', 25);
+
+        $this->pagination = $pagination;
+        $this->per_page = $requestPerPage;
     }
 }

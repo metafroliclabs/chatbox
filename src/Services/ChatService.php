@@ -6,9 +6,18 @@ use Illuminate\Support\Facades\DB;
 use Metafroliclabs\LaravelChat\Models\Chat;
 use Metafroliclabs\LaravelChat\Models\ChatMessage;
 use Metafroliclabs\LaravelChat\Services\Core\BaseService;
+use Metafroliclabs\LaravelChat\Services\Core\FileService;
 
 class ChatService extends BaseService
 {
+    protected $fileService;
+
+    public function __construct(FileService $fileService)
+    {
+        parent::__construct();
+        $this->fileService = $fileService;
+    }
+
     // private function getNameColumn()
     // {
     //     $cols = config('chat.name_cols_in_users_table');
@@ -64,7 +73,7 @@ class ChatService extends BaseService
                 ->limit(1)
         );
 
-        return $query->paginate();
+        return $this->pagination ? $query->paginate($this->per_page) : $query->get();
     }
 
     public function get_unread_chat_list($request)
@@ -107,7 +116,7 @@ class ChatService extends BaseService
                 ->limit(1)
         );
 
-        return $query->paginate();
+        return $this->pagination ? $query->paginate($this->per_page) : $query->get();
     }
 
     public function get_unread_chat_count()
@@ -161,7 +170,7 @@ class ChatService extends BaseService
         $image = null;
 
         if ($request->hasFile('picture')) {
-            $image = uploadFile($request->picture, 'Img', 'chat');
+            $image = $this->fileService->uploadFile($request->picture, 'Img', 'chat');
         }
 
         DB::beginTransaction();
@@ -216,12 +225,16 @@ class ChatService extends BaseService
         // Delete chat if no users remain
         if ($chat->users()->count() === 0) {
             $chat->delete();
-
         } elseif ($isAdmin) {
+            // Check if there's already another admin
+            $existingAdmin = $chat->users()->wherePivot('role', Chat::ADMIN)->exists();
+
             // Reassign admin role if needed
-            $newAdmin = $chat->users()->first();
-            if ($newAdmin) {
-                $chat->users()->updateExistingPivot($newAdmin->id, ['role' => Chat::ADMIN]);
+            if (!$existingAdmin) {
+                $newAdmin = $chat->users()->first();
+                if ($newAdmin) {
+                    $chat->users()->updateExistingPivot($newAdmin->id, ['role' => Chat::ADMIN]);
+                }
             }
         }
 

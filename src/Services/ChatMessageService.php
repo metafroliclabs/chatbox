@@ -11,21 +11,26 @@ class ChatMessageService extends BaseService
 
     public function __construct(FileService $fileService)
     {
+        parent::__construct();
         $this->fileService = $fileService;
     }
     
     public function getChatMessages($chat)
     {
-        $messages = $chat->messages()->latest()->paginate();
-        return $messages;
+        $query = $chat->messages()->latest();
+    
+        return $this->pagination
+            ? $query->paginate($this->per_page)
+            : $query->get();
     }
 
     public function sendMessage($chat, $request)
     {
         $messages = array();
         if ($request->attachments) {
-            $uploaded = $this->fileService->uploadMultipleFiles($request->attachments, "Img", "attachments");
+            $uploaded = $this->fileService->uploadMultipleFiles($request->attachments);
             $images = $uploaded['data'];
+            
             foreach ($images as $key => $image) {
                 $message = $chat->messages()->create(['user_id' => auth()->id()]);
                 $message->attachment()->create($image);
