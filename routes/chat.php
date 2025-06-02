@@ -27,9 +27,9 @@ Route::middleware(config('chat.middleware'))->prefix(config('chat.prefix'))->gro
     Route::post('/{id}/delete', [ChatController::class, 'delete']);
     Route::post('/{id}/leave', [ChatController::class, 'leave']);
 
-    // Route::get('/{id}/users', [ChatController::class, 'get_users']);
-    // Route::post('/{id}/users/add', [ChatController::class, 'add_users']);
-    // Route::post('/{id}/users/remove', [ChatController::class, 'remove_users']);
+    Route::get('/{id}/users', [ChatController::class, 'get_users']);
+    Route::post('/{id}/users/add', [ChatController::class, 'add_users']);
+    Route::post('/{id}/users/remove', [ChatController::class, 'remove_users']);
     // Route::post('/{id}/users/{uid}/admin', [ChatController::class, 'manage_admin']);
 
     Route::get('/{id}/messages', [ChatMessageController::class, 'index']);

@@ -18,7 +18,7 @@ return [
     */
 
     'pagination' => true,
-    'pagination_records' => env('CHAT_PAGINATION_RECORDS', 25),
+    'per_page' => env('CHAT_PER_PAGE', 25),
 
     /*
     |-------------------------------------

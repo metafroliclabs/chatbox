@@ -264,4 +264,89 @@ class ChatService extends BaseService
 
         return $chat;
     }
+
+    public function get_chat_users($id)
+    {
+        $chat = Chat::whereHas('users', function ($q) {
+            $q->where('user_id', auth()->id());
+        })
+            ->findOrFail($id);
+
+        return $chat->users;
+    }
+
+    public function add_users($request, $id)
+    {
+        $authId = auth()->id();
+
+        // Fetch the chat and ensure the user is part of it
+        $chat = Chat::where('type', Chat::GROUP)
+            ->whereHas('users', function ($q) use ($authId) {
+                $q->where('user_id', $authId);
+            })
+            ->findOrFail($id);
+
+        // Check if the current user is admin
+        $authPivot = $chat->users()->where('user_id', $authId)->first();
+        if (!$authPivot || $authPivot->pivot->role !== Chat::ADMIN) {
+            throw new Exception("Only admins can add users");
+        }
+
+        // Prepare users to attach
+        $existingUserIds = $chat->users()->pluck('user_id')->toArray();
+        $userTimestamps = [];
+
+        foreach ($request->users as $userId) {
+            if ($userId == $authId || in_array($userId, $existingUserIds)) {
+                continue; // Skip if self or already in chat
+            }
+
+            $userTimestamps[$userId] = [
+                'created_at' => now(),
+                'updated_at' => now()
+            ];
+        }
+
+        // Attach only new users
+        if (!empty($userTimestamps)) {
+            $chat->users()->attach($userTimestamps);
+        }
+
+        $chat->load('users');
+        return $chat->users;
+    }
+
+    public function remove_users($request, $id)
+    {
+        $authId = auth()->id();
+
+        // Find the chat and check if the user is part of it
+        $chat = Chat::where('type', Chat::GROUP)
+            ->whereHas('users', function ($q) use ($authId) {
+                $q->where('user_id', $authId);
+            })
+            ->findOrFail($id);
+
+        // Check if the authenticated user is an admin
+        $authPivot = $chat->users()->where('user_id', $authId)->first();
+        if (!$authPivot || $authPivot->pivot->role !== Chat::ADMIN) {
+            throw new Exception("Only admins can add users");
+        }
+
+        // Get valid members in the chat
+        $existingUserIds = $chat->users()->pluck('user_id')->toArray();
+
+        // Determine users to remove (exclude self, and non-members)
+        $removableUserIds = array_filter($request->users, function ($userId) use ($authId, $existingUserIds) {
+            return $userId != $authId && in_array($userId, $existingUserIds);
+        });
+
+        // Detach the selected users
+        if (!empty($removableUserIds)) {
+            $chat->users()->detach($removableUserIds);
+        }
+
+        $chat->load('users');
+        return $chat->users;
+    }
 }
