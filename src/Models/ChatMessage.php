@@ -48,6 +48,11 @@ class ChatMessage extends Model
         return $this->hasMany(ChatMessageReaction::class);
     }
 
+    public function deletions()
+    {
+        return $this->hasMany(ChatMessageDeletion::class);
+    }
+
     public function views()
     {
         return $this->hasMany(ChatMessageView::class);

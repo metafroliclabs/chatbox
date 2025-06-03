@@ -2,6 +2,7 @@
 
 namespace Metafroliclabs\LaravelChat\Services;
 
+use Exception;
 use Metafroliclabs\LaravelChat\Models\ChatMessageView;
 use Metafroliclabs\LaravelChat\Services\Core\BaseService;
 use Metafroliclabs\LaravelChat\Services\Core\FileService;
@@ -107,5 +108,31 @@ class ChatMessageService extends BaseService
         $view = $message->views()->create(['user_id' => auth()->id()]);
 
         return $view;
+    }
+
+    public function deleteMessage($request, $chat, $mid)
+    {
+        $authId = auth()->id();
+        $message = $chat->messages()->findOrFail($mid);
+    
+        $deleteForEveryone = $request->boolean('delete_for_everyone');
+    
+        if ($deleteForEveryone) {
+            // Only sender can delete for everyone, and only within 1 hour
+            if ($message->user_id !== $authId) {
+                throw new Exception("You can only delete your own messages for everyone.");
+            }
+    
+            if ($message->created_at->diffInMinutes(now()) > 60) {
+                throw new Exception("You can only delete messages for everyone within 1 hour.");
+            }
+    
+            $message->update(['deleted_at' => now()]);
+        } else {
+            // "Delete for me" – store a user-specific deletion
+            $message->deletions()->firstOrCreate(['user_id' => $authId]);
+        }
+    
+        return "Message has been deleted.";
     }
 }

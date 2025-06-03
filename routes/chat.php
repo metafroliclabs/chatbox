@@ -41,5 +41,5 @@ Route::middleware(config('chat.middleware'))->prefix(config('chat.prefix'))->gro
     Route::get('/{id}/messages/{mid}/views', [ChatMessageController::class, 'get_message_views']);
     Route::post('/{id}/messages/{mid}/views', [ChatMessageController::class, 'view_message']);
     // Route::post('/{id}/messages/{mid}/update', [ChatMessageController::class, 'update_message']);
-    // Route::post('/{id}/messages/{mid}/delete', [ChatMessageController::class, 'delete_message']);
+    Route::post('/{id}/messages/{mid}/delete', [ChatMessageController::class, 'delete_message']);
 });
