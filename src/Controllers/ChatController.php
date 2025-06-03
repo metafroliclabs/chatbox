@@ -69,4 +69,10 @@ class ChatController extends Controller
         $chat = $this->chatService->clear_chat($id);
         return $this->response->success(["message" => "Chat has been deleted successfully"]);
     }
+
+    public function mute($id)
+    {
+        $chat = $this->chatService->mute_chat($id);
+        return $this->response->success(new ChatResource($chat));
+    }
 }

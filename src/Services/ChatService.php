@@ -316,6 +316,25 @@ class ChatService extends BaseService
         return $chat;
     }
 
+    public function mute_chat($id)
+    {
+        $userId = auth()->id();
+
+        $chat = Chat::whereHas('users', function ($q) use ($userId) {
+            $q->where('user_id', $userId);
+        })
+            ->findOrFail($id);
+
+        $authPivot = $chat->users()->where('user_id', $userId)->first();
+        $notification = $authPivot->pivot->bg_notification;
+
+        $chat->users()->updateExistingPivot($userId, [
+            'bg_notification' => !$notification
+        ]);
+
+        return $chat;
+    }
+
     // CHAT GROUP USERS
     public function get_chat_users($id)
     {
