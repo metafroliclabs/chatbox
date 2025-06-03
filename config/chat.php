@@ -30,9 +30,20 @@ return [
     |
     */
 
-    'user_image_url' => true,
-    'user_image_col' => 'avatar',
-    'user_name_cols' => ['first_name', 'last_name'],
+    'user' => [
+        'image_url' => true,
+        'image_col' => 'avatar',
+        'name_cols' => ['first_name', 'last_name'],
+    ],
+  
+    /*
+    |-------------------------------------
+    | Chat messages configurations
+    |-------------------------------------
+    */
+
+    'enable_message_time_limit' => true,
+    'message_time_limit_minutes' => 60,
 
     /*
     |-------------------------------------

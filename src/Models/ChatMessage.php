@@ -17,6 +17,7 @@ class ChatMessage extends Model
         'user_id',
         'message',
         'replied_to_message_id',
+        'is_updated',
         'deleted_at',
     ];
 

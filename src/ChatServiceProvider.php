@@ -18,7 +18,7 @@ class ChatServiceProvider extends ServiceProvider
 
         $this->app->singleton(FileService::class);
 
-        $this->mergeConfigFrom(__DIR__.'/../config/chat.php', 'chat');
+        $this->mergeConfigFrom(__DIR__ . '/../config/chat.php', 'chat');
     }
 
     /**

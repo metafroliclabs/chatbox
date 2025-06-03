@@ -18,6 +18,7 @@ return new class extends Migration
             $table->unsignedInteger('user_id');
             $table->text('message')->nullable();
             $table->unsignedInteger('replied_to_message_id')->nullable();
+            $table->boolean('is_updated')->default(false);
             $table->softDeletes();
             $table->timestamps();
         });

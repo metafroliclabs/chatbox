@@ -65,6 +65,15 @@ class ChatMessageController extends Controller
         return $this->response->success(new DefaultResource($view));
     }
 
+    public function update_message(Request $request, $id, $mid)
+    {
+        $request->validate(['message' => 'required']);
+
+        $chat = $this->chatService->get_chat($id);
+        $message = $this->messageService->updateMessage($request, $chat, $mid);
+        return $this->response->success(new MessageResource($message));
+    }
+    
     public function delete_message(Request $request, $id, $mid)
     {
         $request->validate(['delete_for_everyone' => 'nullable|in:0,1']);
