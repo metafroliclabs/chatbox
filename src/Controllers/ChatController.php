@@ -6,8 +6,6 @@ use Illuminate\Http\Request;
 use Metafroliclabs\LaravelChat\Contracts\ChatResponseContract;
 use Metafroliclabs\LaravelChat\Resources\ChatResource;
 use Metafroliclabs\LaravelChat\Requests\CreateGroupRequest;
-use Metafroliclabs\LaravelChat\Requests\UsersRequest;
-use Metafroliclabs\LaravelChat\Resources\DefaultResource;
 use Metafroliclabs\LaravelChat\Services\ChatService;
 
 class ChatController extends Controller
@@ -63,23 +61,5 @@ class ChatController extends Controller
     {
         $chat = $this->chatService->clear_chat($id);
         return $this->response->success(["message" => "Chat has been deleted successfully"]);
-    }
-
-    public function get_users($id)
-    {
-        $users = $this->chatService->get_chat_users($id);
-        return $this->response->success(DefaultResource::collection($users));
-    }
-
-    public function add_users(UsersRequest $request, $id)
-    {
-        $users = $this->chatService->add_users($request, $id);
-        return $this->response->success(DefaultResource::collection($users));
-    }
-
-    public function remove_users(UsersRequest $request, $id)
-    {
-        $users = $this->chatService->remove_users($request, $id);
-        return $this->response->success(DefaultResource::collection($users));
     }
 }

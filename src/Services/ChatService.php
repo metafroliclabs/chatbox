@@ -265,6 +265,7 @@ class ChatService extends BaseService
         return $chat;
     }
 
+    // CHAT GROUP USERS
     public function get_chat_users($id)
     {
         $chat = Chat::whereHas('users', function ($q) {
@@ -345,6 +346,42 @@ class ChatService extends BaseService
         if (!empty($removableUserIds)) {
             $chat->users()->detach($removableUserIds);
         }
+
+        $chat->load('users');
+        return $chat->users;
+    }
+
+    public function manage_admin($id, $uid)
+    {
+        $authId = auth()->id();
+
+        // Find the chat and check if the user is part of it
+        $chat = Chat::where('type', Chat::GROUP)
+            ->whereHas('users', function ($q) use ($authId) {
+                $q->where('user_id', $authId);
+            })
+            ->findOrFail($id);
+
+        // Ensure the authenticated user is an admin
+        $authPivot = $chat->users()->where('user_id', $authId)->first();
+        if (!$authPivot || $authPivot->pivot->role !== Chat::ADMIN) {
+            throw new Exception("Only admins can perform this action.");
+        }
+
+        // Prevent modifying own admin role (optional)
+        if ($uid == $authId) {
+            throw new Exception("You cannot modify your own admin role.");
+        }
+
+        // Find target user in the chat
+        $user = $chat->users()->where('user_id', $uid)->first();
+        if (!$user) {
+            throw new Exception("User is not in the chat.");
+        }
+
+        // Toggle role
+        $newRole = $user->pivot->role === Chat::ADMIN ? Chat::USER : Chat::ADMIN;
+        $chat->users()->updateExistingPivot($uid, ['role' => $newRole]);
 
         $chat->load('users');
         return $chat->users;

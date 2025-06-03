@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use Metafroliclabs\LaravelChat\Controllers\ChatController;
 use Metafroliclabs\LaravelChat\Controllers\ChatMessageController;
+use Metafroliclabs\LaravelChat\Controllers\ChatUserController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,15 +28,15 @@ Route::middleware(config('chat.middleware'))->prefix(config('chat.prefix'))->gro
     Route::post('/{id}/delete', [ChatController::class, 'delete']);
     Route::post('/{id}/leave', [ChatController::class, 'leave']);
 
-    Route::get('/{id}/users', [ChatController::class, 'get_users']);
-    Route::post('/{id}/users/add', [ChatController::class, 'add_users']);
-    Route::post('/{id}/users/remove', [ChatController::class, 'remove_users']);
-    // Route::post('/{id}/users/{uid}/admin', [ChatController::class, 'manage_admin']);
+    Route::get('/{id}/users', [ChatUserController::class, 'get_users']);
+    Route::post('/{id}/users/add', [ChatUserController::class, 'add_users']);
+    Route::post('/{id}/users/remove', [ChatUserController::class, 'remove_users']);
+    Route::post('/{id}/users/{uid}/admin', [ChatUserController::class, 'manage_admin']);
 
     Route::get('/{id}/messages', [ChatMessageController::class, 'index']);
     Route::post('/{id}/messages', [ChatMessageController::class, 'send_message']);
     Route::get('/{id}/messages/{mid}/likes', [ChatMessageController::class, 'get_message_likes']);
-    Route::post('/{id}/messages/{mid}/like', [ChatMessageController::class, 'like_message']);
+    Route::post('/{id}/messages/{mid}/likes', [ChatMessageController::class, 'like_message']);
     Route::get('/{id}/messages/{mid}/views', [ChatMessageController::class, 'get_message_views']);
     Route::post('/{id}/messages/{mid}/views', [ChatMessageController::class, 'view_message']);
     // Route::post('/{id}/messages/{mid}/update', [ChatMessageController::class, 'update_message']);
