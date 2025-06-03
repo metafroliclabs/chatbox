@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Metafroliclabs\LaravelChat\Contracts\ChatResponseContract;
 use Metafroliclabs\LaravelChat\Resources\ChatResource;
 use Metafroliclabs\LaravelChat\Requests\CreateGroupRequest;
+use Metafroliclabs\LaravelChat\Requests\UpdateGroupRequest;
 use Metafroliclabs\LaravelChat\Services\ChatService;
 
 class ChatController extends Controller
@@ -51,6 +52,12 @@ class ChatController extends Controller
         return $this->response->success(new ChatResource($chat));
     }
 
+    public function update(UpdateGroupRequest $request, $id)
+    {
+        $chat = $this->chatService->update_chat($request, $id);
+        return $this->response->success(new ChatResource($chat));
+    }
+    
     public function leave($id)
     {
         $chat = $this->chatService->leave_chat_group($id);

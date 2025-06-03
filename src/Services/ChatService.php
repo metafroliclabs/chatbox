@@ -176,7 +176,7 @@ class ChatService extends BaseService
         $image = null;
 
         if ($request->hasFile('picture')) {
-            $image = $this->fileService->uploadFile($request->picture, 'Img', 'chat');
+            $image = $this->fileService->uploadFile($request->picture, 'File', 'chat');
         }
 
         DB::beginTransaction();
@@ -186,6 +186,8 @@ class ChatService extends BaseService
             'image' => $image ? $image['data'] : $image,
             'created_by' => $authId
         ]);
+
+        $chat->setting()->create();
 
         // Attach creator as admin
         $chat->users()->attach($authId, [
@@ -244,6 +246,55 @@ class ChatService extends BaseService
             }
         }
 
+        return $chat;
+    }
+
+    public function update_chat($request, $id)
+    {
+        $authId = auth()->id();
+        $image = null;
+
+        $chat = Chat::where('type', Chat::GROUP)
+            ->whereHas('users', function ($q) use ($authId) {
+                $q->where('user_id', $authId);
+            })
+            ->findOrFail($id);
+
+        $setting = $chat->setting;
+        $authPivot = $chat->users()->where('user_id', $authId)->first();
+
+        if (!$setting->can_update_settings && $authPivot->pivot->role !== Chat::ADMIN) {
+            throw new Exception("Only admins can update group settings.");
+        }
+
+        if ($request->hasFile('picture')) {
+            $image = $this->fileService->uploadFile($request->picture, 'File', 'chat');
+        }
+
+        $chat->update([
+            'name' => $request->name,
+            'image' => $image ? $image['data'] : $image,
+        ]);
+
+        // Group setting update (admin only)
+        if ($authPivot->pivot->role === Chat::ADMIN) {
+            $settingData = [];
+            if ($request->filled('can_add_users')) {
+                $settingData['can_add_users'] = $request->can_add_users;
+            }
+            if ($request->filled('can_send_messages')) {
+                $settingData['can_send_messages'] = $request->can_send_messages;
+            }
+            if ($request->filled('can_update_settings')) {
+                $settingData['can_update_settings'] = $request->can_update_settings;
+            }
+
+            if (!empty($settingData)) {
+                $setting->fill(array_merge(['chat_id' => $chat->id], $settingData))->save();
+            }
+        }
+
+        $chat->load('setting');
         return $chat;
     }
 

@@ -24,9 +24,10 @@ Route::middleware(config('chat.middleware'))->prefix(config('chat.prefix'))->gro
 
     Route::post('/create', [ChatController::class, 'create']);
     Route::post('/create/group', [ChatController::class, 'create_group']);
-    // Route::post('/{id}/update', [ChatController::class, 'update']);
+    Route::post('/{id}/update', [ChatController::class, 'update']);
     Route::post('/{id}/delete', [ChatController::class, 'delete']);
     Route::post('/{id}/leave', [ChatController::class, 'leave']);
+    // Route::post('/{id}/mute', [ChatController::class, 'mute']);
 
     Route::get('/{id}/users', [ChatUserController::class, 'get_users']);
     Route::post('/{id}/users/add', [ChatUserController::class, 'add_users']);
