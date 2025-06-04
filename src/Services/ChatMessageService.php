@@ -4,6 +4,7 @@ namespace Metafroliclabs\LaravelChat\Services;
 
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Metafroliclabs\LaravelChat\Models\ChatMessage;
 use Metafroliclabs\LaravelChat\Models\ChatMessageView;
 use Metafroliclabs\LaravelChat\Services\Core\BaseService;
 use Metafroliclabs\LaravelChat\Services\Core\FileService;
@@ -45,7 +46,7 @@ class ChatMessageService extends BaseService
 
         // Get IDs of messages not yet viewed by the current user and not sent by the user
         $unseenMessages = $messages->filter(function ($msg) use ($authId) {
-            return $msg->user_id !== $authId && !$msg->views->contains('user_id', $authId);
+            return $msg->user_id !== $authId && $msg->type !== ChatMessage::ACTIVITY && !$msg->views->contains('user_id', $authId);
         });
 
         // Prepare insert data
@@ -64,6 +65,7 @@ class ChatMessageService extends BaseService
             ChatMessageView::insert($viewData);
         }
 
+        $messages->load('views');
         return $messages;
     }
 
@@ -97,13 +99,13 @@ class ChatMessageService extends BaseService
 
     public function getMessageLikes($chat, $mid)
     {
-        $message = $chat->messages()->findOrFail($mid);
+        $message = $chat->messages()->where('type', ChatMessage::MESSAGE)->findOrFail($mid);
         return $message->reactions()->get();
     }
 
     public function toggleLike($chat, $mid)
     {
-        $message = $chat->messages()->findOrFail($mid);
+        $message = $chat->messages()->where('type', ChatMessage::MESSAGE)->findOrFail($mid);
         $isLiked = $message->reactions()->where('user_id', auth()->id())->first();
 
         if ($isLiked) {
@@ -117,13 +119,13 @@ class ChatMessageService extends BaseService
 
     public function getMessageViews($chat, $mid)
     {
-        $message = $chat->messages()->findOrFail($mid);
+        $message = $chat->messages()->where('type', ChatMessage::MESSAGE)->findOrFail($mid);
         return $message->views()->get();
     }
 
     public function viewMessage($chat, $mid)
     {
-        $message = $chat->messages()->findOrFail($mid);
+        $message = $chat->messages()->where('type', ChatMessage::MESSAGE)->findOrFail($mid);
         $view = $message->views()->create(['user_id' => auth()->id()]);
 
         return $view;
@@ -135,7 +137,7 @@ class ChatMessageService extends BaseService
         $update_time_limit = config('chat.update_message_time_limit', 60);
 
         $authId = auth()->id();
-        $message = $chat->messages()->findOrFail($mid);
+        $message = $chat->messages()->where('type', ChatMessage::MESSAGE)->findOrFail($mid);
 
         if ($message->user_id !== $authId) {
             throw new Exception("You can only update your own message.");
@@ -157,7 +159,7 @@ class ChatMessageService extends BaseService
     public function deleteMessage($request, $chat, $mid)
     {
         $authId = auth()->id();
-        $message = $chat->messages()->findOrFail($mid);
+        $message = $chat->messages()->where('type', ChatMessage::MESSAGE)->findOrFail($mid);
 
         $deleteForEveryone = $request->boolean('delete_for_everyone');
 

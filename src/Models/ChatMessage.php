@@ -11,6 +11,9 @@ class ChatMessage extends Model
 {
     use HasFactory;
 
+    public const MESSAGE = "message";
+    public const ACTIVITY = "activity";
+
     protected $fillable = [
         'type',
         'chat_id',

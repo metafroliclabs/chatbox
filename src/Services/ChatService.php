@@ -21,12 +21,25 @@ class ChatService extends BaseService
 
     private function getNameColumn()
     {
-        $cols = config('chat.user.name_cols');
+        $cols = config('chat.user.name_cols', []);
         if (count($cols) > 1) {
             $str = implode(", ' ', ", $cols);
             return DB::raw("CONCAT($str)");
         }
         return $cols[0];
+    }
+
+    private function getFullName($user)
+    {
+        $fullname = "";
+        $cols = config('chat.user.name_cols', []);
+        if ($user && !empty($cols)) {
+            $fullname = collect($cols)
+                ->map(fn($col) => $user->{$col} ?? '')
+                ->filter() // remove null or empty values
+                ->implode(' ');
+        }
+        return $fullname;
     }
 
     public function get_chat($id)
@@ -89,6 +102,7 @@ class ChatService extends BaseService
         })
             ->whereHas('messages', function ($q) use ($userId) {
                 $q->where('user_id', '!=', $userId)
+                    ->where('type', ChatMessage::MESSAGE)
                     ->whereDoesntHave('views', function ($q2) use ($userId) {
                         $q2->where('user_id', $userId);
                     });
@@ -131,6 +145,7 @@ class ChatService extends BaseService
         })
             ->whereHas('messages', function ($q) use ($userId) {
                 $q->where('user_id', '!=', $userId)
+                    ->where('type', ChatMessage::MESSAGE)
                     ->whereDoesntHave('views', function ($q2) use ($userId) {
                         $q2->where('user_id', $userId);
                     });
@@ -188,7 +203,15 @@ class ChatService extends BaseService
             'created_by' => $authId
         ]);
 
+        // create chat setting record
         $chat->setting()->create();
+
+        // create group creation activity
+        $chat->messages()->create([
+            'type' => ChatMessage::ACTIVITY,
+            'user_id' => auth()->id(),
+            'message' => $this->getFullName(auth()->user()) . ' created the group "' . $request->name . '".',
+        ]);
 
         // Attach creator as admin
         $chat->users()->attach($authId, [
@@ -228,8 +251,16 @@ class ChatService extends BaseService
         $pivotData = $chat->users()->where('user_id', $userId)->first();
         $isAdmin = $pivotData?->pivot?->role === Chat::ADMIN;
 
+        DB::beginTransaction();
         // Detach user
         $chat->users()->detach($userId);
+
+        // create group creation activity
+        $chat->messages()->create([
+            'type' => ChatMessage::ACTIVITY,
+            'user_id' => auth()->id(),
+            'message' => $this->getFullName(auth()->user()) . ' left',
+        ]);
 
         // Delete chat if no users remain
         if ($chat->users()->count() === 0) {
@@ -246,6 +277,7 @@ class ChatService extends BaseService
                 }
             }
         }
+        DB::commit();
 
         return $chat;
     }
