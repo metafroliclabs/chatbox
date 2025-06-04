@@ -19,15 +19,15 @@ class ChatService extends BaseService
         $this->fileService = $fileService;
     }
 
-    // private function getNameColumn()
-    // {
-    //     $cols = config('chat.name_cols_in_users_table');
-    //     if (count($cols) > 1) {
-    //         $str = implode(", ' ', ", $cols);
-    //         return DB::raw("CONCAT($str)");
-    //     }
-    //     return $cols[0];
-    // }
+    private function getNameColumn()
+    {
+        $cols = config('chat.user.name_cols');
+        if (count($cols) > 1) {
+            $str = implode(", ' ', ", $cols);
+            return DB::raw("CONCAT($str)");
+        }
+        return $cols[0];
+    }
 
     public function get_chat($id)
     {
@@ -44,6 +44,7 @@ class ChatService extends BaseService
     {
         $userId = auth()->id();
         $searchTerm = '%' . $request->search . '%';
+        $concatName = $this->getNameColumn();
 
         $query = Chat::whereHas('users', function ($q) use ($userId) {
             $q->where('user_id', $userId);
@@ -51,11 +52,11 @@ class ChatService extends BaseService
 
         // Filter by search
         if ($request->filled('search')) {
-            $query->where(function ($q) use ($searchTerm) {
-                $q->where(function ($q2) use ($searchTerm) {
+            $query->where(function ($q) use ($searchTerm, $concatName) {
+                $q->where(function ($q2) use ($searchTerm, $concatName) {
                     $q2->where('type', Chat::PRIVATE)
-                        ->whereHas('users', function ($q3) use ($searchTerm) {
-                            $q3->where('first_name', 'like', $searchTerm);
+                        ->whereHas('users', function ($q3) use ($searchTerm, $concatName) {
+                            $q3->where($concatName, 'like', $searchTerm);
                         });
                 })->orWhere('name', 'like', $searchTerm);
             });
@@ -81,6 +82,7 @@ class ChatService extends BaseService
     {
         $userId = auth()->id();
         $searchTerm = '%' . $request->search . '%';
+        $concatName = $this->getNameColumn();
 
         $query = Chat::whereHas('users', function ($q) use ($userId) {
             $q->where('user_id', $userId);
@@ -94,11 +96,11 @@ class ChatService extends BaseService
 
         // Apply search filter
         if ($request->filled('search')) {
-            $query->where(function ($q) use ($searchTerm) {
-                $q->where(function ($q2) use ($searchTerm) {
+            $query->where(function ($q) use ($searchTerm, $concatName) {
+                $q->where(function ($q2) use ($searchTerm, $concatName) {
                     $q2->where('type', Chat::PRIVATE)
-                        ->whereHas('users', function ($q3) use ($searchTerm) {
-                            $q3->where('name', 'like', $searchTerm);
+                        ->whereHas('users', function ($q3) use ($searchTerm, $concatName) {
+                            $q3->where($concatName, 'like', $searchTerm);
                         });
                 })->orWhere('name', 'like', $searchTerm);
             });
@@ -301,10 +303,9 @@ class ChatService extends BaseService
     {
         $userId = auth()->id();
 
-        $chat = Chat::where('type', Chat::GROUP)
-            ->whereHas('users', function ($q) use ($userId) {
-                $q->where('user_id', $userId);
-            })
+        $chat = Chat::whereHas('users', function ($q) use ($userId) {
+            $q->where('user_id', $userId);
+        })
             ->findOrFail($id);
 
 

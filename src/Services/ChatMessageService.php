@@ -3,6 +3,7 @@
 namespace Metafroliclabs\LaravelChat\Services;
 
 use Exception;
+use Illuminate\Support\Facades\DB;
 use Metafroliclabs\LaravelChat\Models\ChatMessageView;
 use Metafroliclabs\LaravelChat\Services\Core\BaseService;
 use Metafroliclabs\LaravelChat\Services\Core\FileService;
@@ -20,8 +21,23 @@ class ChatMessageService extends BaseService
     public function getChatMessages($chat)
     {
         $authId = auth()->id();
+        $user = $chat->users()->where('user_id', $authId)->first();
 
-        $query = $chat->messages()->latest();
+        $query = $chat->messages()
+            ->whereDoesntHave('deletions', function ($q) use ($authId) {
+                $q->where('user_id', $authId);
+            })
+            ->latest();
+
+        if ($user) {
+            if ($user->pivot?->created_at) {
+                $query->where('created_at', '>=', $user->pivot->created_at);
+            }
+
+            if ($user->pivot?->cleared_at) {
+                $query->where('created_at', '>=', $user->pivot->cleared_at);
+            }
+        }
 
         $messages = $this->pagination
             ? $query->paginate($this->per_page)
@@ -54,6 +70,7 @@ class ChatMessageService extends BaseService
     public function sendMessage($chat, $request)
     {
         $messages = array();
+        DB::beginTransaction();
         if ($request->attachments) {
             $uploaded = $this->fileService->uploadMultipleFiles($request->attachments);
             $images = $uploaded['data'];
@@ -69,9 +86,11 @@ class ChatMessageService extends BaseService
             $message = $chat->messages()->create([
                 'user_id' => auth()->id(),
                 'message' => $request->message,
+                'replied_to_message_id' => $request->reply_to ?? null
             ]);
             $messages[] = $message;
         }
+        DB::commit();
 
         return $messages;
     }
@@ -112,6 +131,9 @@ class ChatMessageService extends BaseService
 
     public function updateMessage($request, $chat, $mid)
     {
+        $enable_update_time = config('chat.enable_update_message_time', true);
+        $update_time_limit = config('chat.update_message_time_limit', 60);
+
         $authId = auth()->id();
         $message = $chat->messages()->findOrFail($mid);
 
@@ -119,8 +141,10 @@ class ChatMessageService extends BaseService
             throw new Exception("You can only update your own message.");
         }
 
-        if ($message->created_at->diffInMinutes(now()) > 60) {
-            throw new Exception("You can only update message within 1 hour.");
+        if ($enable_update_time) {
+            if ($message->created_at->diffInMinutes(now()) > $update_time_limit) {
+                throw new Exception("You can only update message within $update_time_limit mins.");
+            }
         }
 
         $message->update([
@@ -138,13 +162,18 @@ class ChatMessageService extends BaseService
         $deleteForEveryone = $request->boolean('delete_for_everyone');
 
         if ($deleteForEveryone) {
-            // Only sender can delete for everyone, and only within 1 hour
+            $enable_delete_time = config('chat.enable_delete_message_time', true);
+            $delete_time_limit = config('chat.delete_message_time_limit', 60);
+
+            // Only sender can delete for everyone
             if ($message->user_id !== $authId) {
                 throw new Exception("You can only delete your own messages for everyone.");
             }
 
-            if ($message->created_at->diffInMinutes(now()) > 60) {
-                throw new Exception("You can only delete messages for everyone within 1 hour.");
+            if ($enable_delete_time) {
+                if ($message->created_at->diffInMinutes(now()) > $delete_time_limit) {
+                    throw new Exception("You can only delete messages for everyone within $delete_time_limit mins.");
+                }
             }
 
             $message->update(['deleted_at' => now()]);

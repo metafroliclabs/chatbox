@@ -17,7 +17,7 @@ return [
     |-------------------------------------
     */
 
-    'pagination' => true,
+    'pagination' => false,
     'per_page' => env('CHAT_PER_PAGE', 25),
 
     /*
@@ -31,7 +31,7 @@ return [
     */
 
     'user' => [
-        'image_url' => true,
+        'enable_image_url' => true,
         'image_col' => 'avatar',
         'name_cols' => ['first_name', 'last_name'],
     ],
@@ -43,8 +43,9 @@ return [
     */
 
     'enable_update_message_time' => true,
-    'enable_delete_message_time' => true,
     'update_message_time_limit' => 60,
+    
+    'enable_delete_message_time' => true,
     'delete_message_time_limit' => 60,
 
     /*

@@ -11,7 +11,7 @@ class ChatMessageAttachment extends Model
 
     protected $fillable = [
         'chat_message_id',
-        'file',
+        'path',
         'type',
     ];
 
@@ -19,5 +19,10 @@ class ChatMessageAttachment extends Model
     public function message()
     {
         return $this->belongsTo(ChatMessage::class);
+    }
+
+    public function getPathAttribute($value)
+    {
+        return $value ? asset($value) : null;
     }
 }

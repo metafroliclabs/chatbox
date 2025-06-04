@@ -15,19 +15,28 @@ class ChatMessageController extends Controller
     public $chatService;
     public $messageService;
     protected $response;
+    protected $pagination;
 
     public function __construct(ChatResponseContract $response, ChatMessageService $messageService, ChatService $chatService)
     {
         $this->response = $response;
         $this->chatService = $chatService;
         $this->messageService = $messageService;
+        $this->pagination = config('chat.pagination', true);
     }
 
     public function index($id)
     {
         $chat = $this->chatService->get_chat($id);
         $messages = $this->messageService->getChatMessages($chat);
-        return $this->response->success(MessageResource::collection($messages));
+
+        $resource = MessageResource::collection($messages);
+
+        $result = $this->pagination
+            ? $resource->response()->getData(true)
+            : $resource;
+
+        return $this->response->success($result);
     }
 
     public function send_message(MessageRequest $request, $id)

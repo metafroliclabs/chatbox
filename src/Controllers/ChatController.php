@@ -13,23 +13,39 @@ class ChatController extends Controller
 {
     public $chatService;
     protected $response;
+    protected $pagination;
 
     public function __construct(ChatResponseContract $response, ChatService $chatService)
     {
         $this->response = $response;
         $this->chatService = $chatService;
+        $this->pagination = config('chat.pagination', true);
     }
 
     public function index(Request $request)
     {
         $chats = $this->chatService->get_chat_list($request);
-        return $this->response->success(ChatResource::collection($chats));
+
+        $resource = ChatResource::collection($chats);
+
+        $result = $this->pagination
+            ? $resource->response()->getData(true)
+            : $resource;
+
+        return $this->response->success($result);
     }
 
     public function unread_list(Request $request)
     {
         $chats = $this->chatService->get_unread_chat_list($request);
-        return $this->response->success(ChatResource::collection($chats));
+
+        $resource = ChatResource::collection($chats);
+
+        $result = $this->pagination
+            ? $resource->response()->getData(true)
+            : $resource;
+
+        return $this->response->success($result);
     }
 
     public function unread_count()
@@ -57,7 +73,7 @@ class ChatController extends Controller
         $chat = $this->chatService->update_chat($request, $id);
         return $this->response->success(new ChatResource($chat));
     }
-    
+
     public function leave($id)
     {
         $chat = $this->chatService->leave_chat_group($id);

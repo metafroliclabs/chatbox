@@ -20,6 +20,7 @@ class ShortMessageResource extends JsonResource
             'message' => $this->deleted_at ? "This message was deleted." : $this->message,
             'deleted_at' => $this->deleted_at,
             'created_at' => $this->created_at,
+            'attachment' => $this->attachment,
             'user' => $this->user,
         ];
     }
