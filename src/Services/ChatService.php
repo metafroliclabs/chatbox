@@ -138,10 +138,9 @@ class ChatService extends BaseService
         return $counts;
     }
 
-    public function create_chat($request)
+    public function create_chat($userId)
     {
         $authId = auth()->id();
-        $userId = $request->user_id;
 
         if ($authId == $userId) {
             throw new Exception("Trying to create a chat with invalid user id.");

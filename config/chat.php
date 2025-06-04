@@ -42,8 +42,10 @@ return [
     |-------------------------------------
     */
 
-    'enable_message_time_limit' => true,
-    'message_time_limit_minutes' => 60,
+    'enable_update_message_time' => true,
+    'enable_delete_message_time' => true,
+    'update_message_time_limit' => 60,
+    'delete_message_time_limit' => 60,
 
     /*
     |-------------------------------------

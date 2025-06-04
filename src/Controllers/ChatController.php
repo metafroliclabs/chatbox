@@ -42,7 +42,7 @@ class ChatController extends Controller
     {
         $request->validate(['user_id' => 'required|exists:users,id']);
 
-        $chat = $this->chatService->create_chat($request);
+        $chat = $this->chatService->create_chat($request->user_id);
         return $this->response->success(new ChatResource($chat));
     }
 

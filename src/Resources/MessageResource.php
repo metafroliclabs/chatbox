@@ -17,7 +17,7 @@ class MessageResource extends JsonResource
         return [
             'id' => $this->id,
             'chat_id' => $this->chat_id,
-            'message' => $this->message,
+            'message' => $this->deleted_at ? "This message was deleted." : $this->message,
             'deleted_at' => $this->deleted_at,
             'created_at' => $this->created_at,
             'user' => $this->user,
