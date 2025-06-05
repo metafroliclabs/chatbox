@@ -210,11 +210,8 @@ class ChatService extends BaseService
         $chat->setting()->create();
 
         // create group creation activity
-        $chat->messages()->create([
-            'type' => ChatMessage::ACTIVITY,
-            'user_id' => auth()->id(),
-            'message' => $this->getFullName(auth()->user()) . ' created the group "' . $request->name . '".',
-        ]);
+        $message = $this->getFullName(auth()->user()) . ' created the group "' . $request->name . '"';
+        $this->logActivity($chat, $message);
 
         // Attach creator as admin
         $chat->users()->attach($authId, [
@@ -259,11 +256,8 @@ class ChatService extends BaseService
         $chat->users()->detach($userId);
 
         // create group creation activity
-        $chat->messages()->create([
-            'type' => ChatMessage::ACTIVITY,
-            'user_id' => auth()->id(),
-            'message' => $this->getFullName(auth()->user()) . ' left',
-        ]);
+        $message = $this->getFullName(auth()->user()) . ' left';
+        $this->logActivity($chat, $message);
 
         // Delete chat if no users remain
         if ($chat->users()->count() === 0) {
@@ -288,7 +282,9 @@ class ChatService extends BaseService
     public function update_chat($request, $id)
     {
         $authId = auth()->id();
+        $actorName = $this->getFullName(auth()->user());
         $image = null;
+        $activityMessages = [];
 
         $chat = Chat::where('type', Chat::GROUP)
             ->whereHas('users', function ($q) use ($authId) {
@@ -300,11 +296,18 @@ class ChatService extends BaseService
         $authPivot = $chat->users()->where('user_id', $authId)->first();
 
         if (!$setting->can_update_settings && $authPivot->pivot->role !== Chat::ADMIN) {
-            throw new Exception("Only admins can update group settings.");
+            throw new Exception("Only admins can update group's settings.");
+        }
+
+        DB::beginTransaction();
+        // Track name change
+        if ($request->filled('name') && $request->name !== $chat->name) {
+            $activityMessages[] = $actorName . ' changed this group\'s name to "' . $request->name . '"';
         }
 
         if ($request->hasFile('picture')) {
             $image = $this->fileService->uploadFile($request->picture, 'File', 'chat');
+            $activityMessages[] = "{$actorName} updated this group's image";
         }
 
         $chat->update([
@@ -315,20 +318,32 @@ class ChatService extends BaseService
         // Group setting update (admin only)
         if ($authPivot->pivot->role === Chat::ADMIN) {
             $settingData = [];
-            if ($request->filled('can_add_users')) {
+            $changes = [];
+
+            if ($request->filled('can_add_users') && $request->can_add_users != $setting->can_add_users) {
                 $settingData['can_add_users'] = $request->can_add_users;
+                $changes[] = 'user management permission';
             }
-            if ($request->filled('can_send_messages')) {
+
+            if ($request->filled('can_send_messages') && $request->can_send_messages != $setting->can_send_messages) {
                 $settingData['can_send_messages'] = $request->can_send_messages;
+                $changes[] = 'sending message permission';
             }
-            if ($request->filled('can_update_settings')) {
+
+            if ($request->filled('can_update_settings') && $request->can_update_settings != $setting->can_update_settings) {
                 $settingData['can_update_settings'] = $request->can_update_settings;
+                $changes[] = 'settings permission';
             }
 
             if (!empty($settingData)) {
                 $setting->fill(array_merge(['chat_id' => $chat->id], $settingData))->save();
+
+                // Grouped activity message
+                $activityMessages[] = "$actorName updated the group's " . implode(', ', $changes) . '.';
             }
         }
+        $this->logActivity($chat, $activityMessages);
+        DB::commit();
 
         $chat->load('setting');
         return $chat;
@@ -368,127 +383,5 @@ class ChatService extends BaseService
         ]);
 
         return $chat;
-    }
-
-    // CHAT GROUP USERS
-    public function get_chat_users($id)
-    {
-        $chat = Chat::whereHas('users', function ($q) {
-            $q->where('user_id', auth()->id());
-        })
-            ->findOrFail($id);
-
-        return $chat->users;
-    }
-
-    public function add_users($request, $id)
-    {
-        $authId = auth()->id();
-
-        // Fetch the chat and ensure the user is part of it
-        $chat = Chat::where('type', Chat::GROUP)
-            ->whereHas('users', function ($q) use ($authId) {
-                $q->where('user_id', $authId);
-            })
-            ->findOrFail($id);
-
-        // Check if the current user is admin
-        $authPivot = $chat->users()->where('user_id', $authId)->first();
-        if (!$authPivot || $authPivot->pivot->role !== Chat::ADMIN) {
-            throw new Exception("Only admins can add users");
-        }
-
-        // Prepare users to attach
-        $existingUserIds = $chat->users()->pluck('user_id')->toArray();
-        $userTimestamps = [];
-
-        foreach ($request->users as $userId) {
-            if ($userId == $authId || in_array($userId, $existingUserIds)) {
-                continue; // Skip if self or already in chat
-            }
-
-            $userTimestamps[$userId] = [
-                'created_at' => now(),
-                'updated_at' => now()
-            ];
-        }
-
-        // Attach only new users
-        if (!empty($userTimestamps)) {
-            $chat->users()->attach($userTimestamps);
-        }
-
-        $chat->load('users');
-        return $chat->users;
-    }
-
-    public function remove_users($request, $id)
-    {
-        $authId = auth()->id();
-
-        // Find the chat and check if the user is part of it
-        $chat = Chat::where('type', Chat::GROUP)
-            ->whereHas('users', function ($q) use ($authId) {
-                $q->where('user_id', $authId);
-            })
-            ->findOrFail($id);
-
-        // Check if the authenticated user is an admin
-        $authPivot = $chat->users()->where('user_id', $authId)->first();
-        if (!$authPivot || $authPivot->pivot->role !== Chat::ADMIN) {
-            throw new Exception("Only admins can add users");
-        }
-
-        // Get valid members in the chat
-        $existingUserIds = $chat->users()->pluck('user_id')->toArray();
-
-        // Determine users to remove (exclude self, and non-members)
-        $removableUserIds = array_filter($request->users, function ($userId) use ($authId, $existingUserIds) {
-            return $userId != $authId && in_array($userId, $existingUserIds);
-        });
-
-        // Detach the selected users
-        if (!empty($removableUserIds)) {
-            $chat->users()->detach($removableUserIds);
-        }
-
-        $chat->load('users');
-        return $chat->users;
-    }
-
-    public function manage_admin($id, $uid)
-    {
-        $authId = auth()->id();
-
-        // Find the chat and check if the user is part of it
-        $chat = Chat::where('type', Chat::GROUP)
-            ->whereHas('users', function ($q) use ($authId) {
-                $q->where('user_id', $authId);
-            })
-            ->findOrFail($id);
-
-        // Ensure the authenticated user is an admin
-        $authPivot = $chat->users()->where('user_id', $authId)->first();
-        if (!$authPivot || $authPivot->pivot->role !== Chat::ADMIN) {
-            throw new Exception("Only admins can perform this action.");
-        }
-
-        // Prevent modifying own admin role (optional)
-        if ($uid == $authId) {
-            throw new Exception("You cannot modify your own admin role.");
-        }
-
-        // Find target user in the chat
-        $user = $chat->users()->where('user_id', $uid)->first();
-        if (!$user) {
-            throw new Exception("User is not in the chat.");
-        }
-
-        // Toggle role
-        $newRole = $user->pivot->role === Chat::ADMIN ? Chat::USER : Chat::ADMIN;
-        $chat->users()->updateExistingPivot($uid, ['role' => $newRole]);
-
-        $chat->load('users');
-        return $chat->users;
     }
 }

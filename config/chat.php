@@ -38,9 +38,11 @@ return [
   
     /*
     |-------------------------------------
-    | Chat messages configurations
+    | Chat messages/activity configurations
     |-------------------------------------
     */
+
+    'enable_activity_messages' =>  true,
 
     'enable_update_message_time' => true,
     'update_message_time_limit' => 60,

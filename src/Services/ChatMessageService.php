@@ -4,6 +4,7 @@ namespace Metafroliclabs\LaravelChat\Services;
 
 use Exception;
 use Illuminate\Support\Facades\DB;
+use Metafroliclabs\LaravelChat\Models\Chat;
 use Metafroliclabs\LaravelChat\Models\ChatMessage;
 use Metafroliclabs\LaravelChat\Models\ChatMessageView;
 use Metafroliclabs\LaravelChat\Services\Core\BaseService;
@@ -71,6 +72,14 @@ class ChatMessageService extends BaseService
 
     public function sendMessage($chat, $request)
     {
+        $authId = auth()->id();
+        $setting = $chat->setting;
+
+        $authPivot = $chat->users()->where('user_id', $authId)->first();
+        if ($chat->type === Chat::GROUP && !$setting->can_send_messages && $authPivot->pivot->role !== Chat::ADMIN) {
+            throw new Exception("Only admins are allowed to send messages");
+        }
+
         $messages = array();
         DB::beginTransaction();
         if ($request->attachments) {
@@ -78,7 +87,7 @@ class ChatMessageService extends BaseService
             $images = $uploaded['data'];
 
             foreach ($images as $key => $image) {
-                $message = $chat->messages()->create(['user_id' => auth()->id()]);
+                $message = $chat->messages()->create(['user_id' => $authId]);
                 $message->attachment()->create($image);
                 $messages[] = $message;
             }
@@ -86,7 +95,7 @@ class ChatMessageService extends BaseService
 
         if ($request->message) {
             $message = $chat->messages()->create([
-                'user_id' => auth()->id(),
+                'user_id' => $authId,
                 'message' => $request->message,
                 'replied_to_message_id' => $request->reply_to ?? null
             ]);
