@@ -7,6 +7,7 @@ use Metafroliclabs\LaravelChat\Contracts\ChatResponseContract;
 use Metafroliclabs\LaravelChat\Resources\ChatResource;
 use Metafroliclabs\LaravelChat\Requests\CreateGroupRequest;
 use Metafroliclabs\LaravelChat\Requests\UpdateGroupRequest;
+use Metafroliclabs\LaravelChat\Resources\ChatDetailResource;
 use Metafroliclabs\LaravelChat\Services\ChatService;
 
 class ChatController extends Controller
@@ -90,5 +91,11 @@ class ChatController extends Controller
     {
         $chat = $this->chatService->mute_chat($id);
         return $this->response->success(new ChatResource($chat));
+    }
+
+    public function show($id)
+    {
+        $chat = $this->chatService->get_chat($id);
+        return $this->response->success(new ChatDetailResource($chat));
     }
 }

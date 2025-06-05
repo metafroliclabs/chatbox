@@ -71,6 +71,7 @@ All routes are prefixed by the config value `chat.prefix` (default: chat) and us
 | POST   | `/{id}/delete`  | Delete a chat                   |
 | POST   | `/{id}/leave`   | Leave group chat                |
 | POST   | `/{id}/mute`    | Mute/unmute chat                |
+| GET    | `/{id}`         | Chat detail                     |
 
 #### 👥 User Management
 
