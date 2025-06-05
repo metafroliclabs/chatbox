@@ -19,29 +19,6 @@ class ChatService extends BaseService
         $this->fileService = $fileService;
     }
 
-    private function getNameColumn()
-    {
-        $cols = config('chat.user.name_cols', []);
-        if (count($cols) > 1) {
-            $str = implode(", ' ', ", $cols);
-            return DB::raw("CONCAT($str)");
-        }
-        return $cols[0];
-    }
-
-    private function getFullName($user)
-    {
-        $fullname = "";
-        $cols = config('chat.user.name_cols', []);
-        if ($user && !empty($cols)) {
-            $fullname = collect($cols)
-                ->map(fn($col) => $user->{$col} ?? '')
-                ->filter() // remove null or empty values
-                ->implode(' ');
-        }
-        return $fullname;
-    }
-
     public function get_chat($id)
     {
         $chat = Chat::with('messages.repliedTo')
@@ -105,6 +82,19 @@ class ChatService extends BaseService
                     ->where('type', ChatMessage::MESSAGE)
                     ->whereDoesntHave('views', function ($q2) use ($userId) {
                         $q2->where('user_id', $userId);
+                    })
+                    ->where(function ($q3) use ($userId) {
+                        $q3->whereHas('chat.users', function ($q4) use ($userId) {
+                            $q4->where('user_id', $userId)
+                                ->where(function ($q5) {
+                                    $q5->whereColumn('chat_messages.created_at', '>=', 'chat_users.created_at')
+                                        ->orWhereNull('chat_users.created_at');
+                                })
+                                ->where(function ($q6) {
+                                    $q6->whereColumn('chat_messages.created_at', '>=', 'chat_users.cleared_at')
+                                        ->orWhereNull('chat_users.cleared_at');
+                                });
+                        });
                     });
             });
 
@@ -148,6 +138,19 @@ class ChatService extends BaseService
                     ->where('type', ChatMessage::MESSAGE)
                     ->whereDoesntHave('views', function ($q2) use ($userId) {
                         $q2->where('user_id', $userId);
+                    })
+                    ->where(function ($q3) use ($userId) {
+                        $q3->whereHas('chat.users', function ($q4) use ($userId) {
+                            $q4->where('user_id', $userId)
+                                ->where(function ($q5) {
+                                    $q5->whereColumn('chat_messages.created_at', '>=', 'chat_users.created_at')
+                                        ->orWhereNull('chat_users.created_at');
+                                })
+                                ->where(function ($q6) {
+                                    $q6->whereColumn('chat_messages.created_at', '>=', 'chat_users.cleared_at')
+                                        ->orWhereNull('chat_users.cleared_at');
+                                });
+                        });
                     });
             })
             ->count();

@@ -2,6 +2,8 @@
 
 namespace Metafroliclabs\LaravelChat\Services\Core;
 
+use Illuminate\Support\Facades\DB;
+
 class BaseService
 {
     protected $pagination;
@@ -14,5 +16,28 @@ class BaseService
 
         $this->pagination = $pagination;
         $this->per_page = $requestPerPage;
+    }
+
+    protected function getNameColumn()
+    {
+        $cols = config('chat.user.name_cols', []);
+        if (count($cols) > 1) {
+            $str = implode(", ' ', ", $cols);
+            return DB::raw("CONCAT($str)");
+        }
+        return $cols[0];
+    }
+
+    protected function getFullName($user)
+    {
+        $fullname = "";
+        $cols = config('chat.user.name_cols', []);
+        if ($user && !empty($cols)) {
+            $fullname = collect($cols)
+                ->map(fn($col) => $user->{$col} ?? '')
+                ->filter() // remove null or empty values
+                ->implode(' ');
+        }
+        return $fullname;
     }
 }
