@@ -4,21 +4,17 @@
 
 A powerful and customizable chat system built for Laravel applications. This package supports private and group chats, media sharing, chat settings, user roles, activity messages, and more.
 
----
-
 ## 🚀 Features
 
 - Private & Group Chat  
-- Message types: text, media, activity  
-- User roles (admin/member)  
+- Message types: message, activity  
+- User roles: (admin/user)  
 - Group settings (permissions control)  
 - Message read/unread tracking  
-- Activity messages (joins, leaves, settings changes)  
+- Activity messages: (joins, leaves, settings changes)  
 - Media upload support  
 - Configurable user info (name, avatar)  
 - Extendable & clean architecture (Service-based)
-
----
 
 ## 📦 Installation
 
@@ -29,11 +25,9 @@ composer require metafroliclabs/laravel-chat
 Publish configuration and migrations:
 
 ```bash
-php artisan vendor:publish --tag=laravel-chat
+php artisan vendor:publish --tag=chat-config
 php artisan migrate
 ```
-
----
 
 ## ⚙️ Configuration
 
@@ -47,15 +41,12 @@ return [
     'enable_activity_messages' => true,
 
     'user' => [
-        'model' => App\Models\User::class,
-        'name_cols' => ['first_name', 'last_name'], // For full name
+        'name_cols' => ['first_name', 'last_name'],
         'image_col' => 'avatar',
         'enable_image_url' => true,
     ],
 ];
 ```
-
----
 
 ## 🧠 Usage
 
@@ -86,8 +77,8 @@ All routes are prefixed by the config value `chat.prefix` (default: chat) and us
 | Method | Endpoint                  | Description                       |
 | ------ | ------------------------- | --------------------------------- |
 | GET    | `/{id}/users`             | Get all users in the chat         |
-| POST   | `/{id}/users/add`         | Add users to a group (admin only) |
-| POST   | `/{id}/users/remove`      | Remove users (admin only)         |
+| POST   | `/{id}/users/add`         | Add users to a group              |
+| POST   | `/{id}/users/remove`      | Remove users                      |
 | POST   | `/{id}/users/{uid}/admin` | Promote/demote user to/from admin |
 
 #### 💬 Messaging
@@ -108,8 +99,6 @@ All routes are prefixed by the config value `chat.prefix` (default: chat) and us
 | GET    | `/{id}/messages/{mid}/views` | Get users who viewed a message |
 | POST   | `/{id}/messages/{mid}/views` | Mark message as viewed         |
 
----
-
 ## 🔔 Activity Messages
 
 Automatically generated for:
@@ -125,8 +114,6 @@ Disable globally in `config/chat.php`:
 'enable_activity_messages' => false,
 ```
 
----
-
 ## 📁 File Uploads
 
 Supports media upload (image, video, file).
@@ -136,8 +123,6 @@ Make sure storage is linked:
 ```php
 php artisan storage:link
 ```
-
----
 
 ## 📄 License
 

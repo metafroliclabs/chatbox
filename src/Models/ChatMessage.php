@@ -2,14 +2,14 @@
 
 namespace Metafroliclabs\LaravelChat\Models;
 
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Metafroliclabs\LaravelChat\Traits\HasUser;
 
 class ChatMessage extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUser;
 
     public const MESSAGE = "message";
     public const ACTIVITY = "activity";
@@ -30,11 +30,6 @@ class ChatMessage extends Model
     public function chat()
     {
         return $this->belongsTo(Chat::class);
-    }
-
-    public function user()
-    {
-        return $this->belongsTo(User::class);
     }
 
     public function repliedTo()

@@ -2,13 +2,13 @@
 
 namespace Metafroliclabs\LaravelChat\Models;
 
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Metafroliclabs\LaravelChat\Traits\HasUser;
 
 class ChatUser extends Model
 {
-    use HasFactory;
+    use HasFactory, HasUser;
 
     protected $fillable = [
         'chat_id',
@@ -22,10 +22,5 @@ class ChatUser extends Model
     public function chat()
     {
         return $this->belongsTo(Chat::class);
-    }
-
-    public function user()
-    {
-        return $this->belongsTo(User::class);
     }
 }

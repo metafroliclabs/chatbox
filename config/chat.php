@@ -31,9 +31,9 @@ return [
     */
 
     'user' => [
-        'enable_image_url' => true,
-        'image_col' => 'avatar',
         'name_cols' => ['first_name', 'last_name'],
+        'image_col' => 'avatar',
+        'enable_image_url' => true,
     ],
   
     /*
