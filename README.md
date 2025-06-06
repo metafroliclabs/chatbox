@@ -6,14 +6,14 @@ A powerful and customizable chat system built for Laravel applications. This pac
 
 ## 🚀 Features
 
-- Private & Group Chat  
-- Message types: message, activity  
-- User roles: (admin/user)  
-- Group settings (permissions control)  
-- Message read/unread tracking  
-- Activity messages: (joins, leaves, settings changes)  
-- Media upload support  
-- Configurable user info (name, avatar)  
+- Private & Group Chat
+- Message types: message, activity
+- User roles: admin, user
+- Group settings (permissions control)
+- Message read/unread tracking
+- Activity messages: group creation, joins, leaves, settings changes
+- Media upload support
+- Configurable user info: name, avatar
 - Extendable & clean architecture (Service-based)
 
 ## 📦 Installation
@@ -22,35 +22,66 @@ A powerful and customizable chat system built for Laravel applications. This pac
 composer require metafroliclabs/laravel-chat
 ```
 
-Publish configuration and migrations:
+Publish configuration file & run migrations:
 
 ```bash
 php artisan vendor:publish --tag=chat-config
 php artisan migrate
 ```
 
+## 📁 File Uploads
+
+Supports media upload (image, video, file).
+
+Make sure storage is linked:
+
+```php
+php artisan storage:link
+```
+
 ## ⚙️ Configuration
 
 Customize settings in `config/chat.php`:
 
+#### Pagination:
+
+Enable or disable pagination:
+
 ```php
-return [
-    'pagination' => true,
-    'per_page' => 25,
+'pagination' => true,
+```
 
-    'enable_activity_messages' => true,
+#### Activity Messages
 
-    'user' => [
-        'name_cols' => ['first_name', 'last_name'],
-        'image_col' => 'avatar',
-        'enable_image_url' => true,
-    ],
-];
+Automatically generated for:
+
+- Group creation
+- User added/removed
+- Group settings updated
+- User left the chat
+
+You can disable all activity messages globally:
+
+```php
+'enable_activity_messages' => false,
+```
+
+#### User Model Configuration
+
+Define how user information (name and avatar) is retrieved:
+
+```php
+'user' => [
+    'name_cols' => ['first_name', 'last_name'], // Columns to build full name
+    'image_col' => 'avatar',                    // Column for profile picture
+    'enable_image_url' => true,                 // If true, image will be URL
+],
 ```
 
 ## 🧠 Usage
 
 #### 📚 API Endpoints
+
 All routes are prefixed by the config value `chat.prefix` (default: chat) and use the `chat.middleware` middleware group.
 
 #### 🔍 Chat List & Info
@@ -113,16 +144,6 @@ Disable globally in `config/chat.php`:
 
 ```php
 'enable_activity_messages' => false,
-```
-
-## 📁 File Uploads
-
-Supports media upload (image, video, file).
-
-Make sure storage is linked:
-
-```php
-php artisan storage:link
 ```
 
 ## 📄 License
