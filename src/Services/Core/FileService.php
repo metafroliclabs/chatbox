@@ -2,8 +2,8 @@
 
 namespace Metafroliclabs\LaravelChat\Services\Core;
 
-use Exception;
 use Illuminate\Support\Facades\Storage;
+use Metafroliclabs\LaravelChat\Exceptions\ChatException;
 
 class FileService
 {
@@ -57,7 +57,7 @@ class FileService
             return $this->success(Storage::url($path));
         }
 
-        throw new Exception("File could not be uploaded");
+        throw new ChatException("File could not be uploaded");
     }
 
     public function uploadMultipleFiles(array $files, ?string $prefix = null, ?string $folder = null): array

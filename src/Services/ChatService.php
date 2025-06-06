@@ -2,8 +2,8 @@
 
 namespace Metafroliclabs\LaravelChat\Services;
 
-use Exception;
 use Illuminate\Support\Facades\DB;
+use Metafroliclabs\LaravelChat\Exceptions\ChatException;
 use Metafroliclabs\LaravelChat\Models\Chat;
 use Metafroliclabs\LaravelChat\Models\ChatMessage;
 use Metafroliclabs\LaravelChat\Services\Core\BaseService;
@@ -163,7 +163,7 @@ class ChatService extends BaseService
         $authId = auth()->id();
 
         if ($authId == $userId) {
-            throw new Exception("Trying to create a chat with invalid user id.");
+            throw new ChatException("Trying to create a chat with invalid user id.");
         }
 
         $chat = Chat::whereHas('users', function ($query) use ($authId) {
@@ -296,7 +296,7 @@ class ChatService extends BaseService
         $authPivot = $chat->users()->where('user_id', $authId)->first();
 
         if (!$setting->can_update_settings && $authPivot->pivot->role !== Chat::ADMIN) {
-            throw new Exception("Only admins can update group's settings.");
+            throw new ChatException("Only admins can update group's settings.");
         }
 
         DB::beginTransaction();

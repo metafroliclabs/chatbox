@@ -2,8 +2,8 @@
 
 namespace Metafroliclabs\LaravelChat\Services;
 
-use Exception;
 use Illuminate\Support\Facades\DB;
+use Metafroliclabs\LaravelChat\Exceptions\ChatException;
 use Metafroliclabs\LaravelChat\Models\Chat;
 use Metafroliclabs\LaravelChat\Models\ChatMessage;
 use Metafroliclabs\LaravelChat\Models\ChatMessageView;
@@ -77,7 +77,7 @@ class ChatMessageService extends BaseService
 
         $authPivot = $chat->users()->where('user_id', $authId)->first();
         if ($chat->type === Chat::GROUP && !$setting->can_send_messages && $authPivot->pivot->role !== Chat::ADMIN) {
-            throw new Exception("Only admins are allowed to send messages");
+            throw new ChatException("Only admins are allowed to send messages");
         }
 
         $messages = array();
@@ -149,12 +149,12 @@ class ChatMessageService extends BaseService
         $message = $chat->messages()->where('type', ChatMessage::MESSAGE)->findOrFail($mid);
 
         if ($message->user_id !== $authId) {
-            throw new Exception("You can only update your own message.");
+            throw new ChatException("You can only update your own message.");
         }
 
         if ($enable_update_time) {
             if ($message->created_at->diffInMinutes(now()) > $update_time_limit) {
-                throw new Exception("You can only update message within $update_time_limit mins.");
+                throw new ChatException("You can only update message within $update_time_limit mins.");
             }
         }
 
@@ -178,12 +178,12 @@ class ChatMessageService extends BaseService
 
             // Only sender can delete for everyone
             if ($message->user_id !== $authId) {
-                throw new Exception("You can only delete your own messages for everyone.");
+                throw new ChatException("You can only delete your own messages for everyone.");
             }
 
             if ($enable_delete_time) {
                 if ($message->created_at->diffInMinutes(now()) > $delete_time_limit) {
-                    throw new Exception("You can only delete messages for everyone within $delete_time_limit mins.");
+                    throw new ChatException("You can only delete messages for everyone within $delete_time_limit mins.");
                 }
             }
 

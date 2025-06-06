@@ -3,10 +3,9 @@
 namespace Metafroliclabs\LaravelChat\Services;
 
 use App\Models\User;
-use Exception;
 use Illuminate\Support\Facades\DB;
+use Metafroliclabs\LaravelChat\Exceptions\ChatException;
 use Metafroliclabs\LaravelChat\Models\Chat;
-use Metafroliclabs\LaravelChat\Models\ChatMessage;
 use Metafroliclabs\LaravelChat\Services\Core\BaseService;
 
 class ChatUserService extends BaseService
@@ -36,7 +35,7 @@ class ChatUserService extends BaseService
         $setting = $chat->setting;
         $authPivot = $chat->users()->where('user_id', $authId)->first();
         if (!$setting->can_add_users && $authPivot->pivot->role !== Chat::ADMIN) {
-            throw new Exception("Only admins can add users");
+            throw new ChatException("Only admins can add users");
         }
 
         // Prepare users to attach
@@ -94,7 +93,7 @@ class ChatUserService extends BaseService
         // Check if the authenticated user is an admin
         $authPivot = $chat->users()->where('user_id', $authId)->first();
         if (!$authPivot || $authPivot->pivot->role !== Chat::ADMIN) {
-            throw new Exception("Only admins can remove users");
+            throw new ChatException("Only admins can remove users");
         }
 
         // Get valid members in the chat
@@ -146,18 +145,18 @@ class ChatUserService extends BaseService
         // Ensure the authenticated user is an admin
         $authPivot = $chat->users()->where('user_id', $authId)->first();
         if (!$authPivot || $authPivot->pivot->role !== Chat::ADMIN) {
-            throw new Exception("Only admins can perform this action.");
+            throw new ChatException("Only admins can perform this action.");
         }
 
         // Prevent modifying own admin role (optional)
         if ($uid == $authId) {
-            throw new Exception("You cannot modify your own admin role.");
+            throw new ChatException("You cannot modify your own admin role.");
         }
 
         // Find target user in the chat
         $user = $chat->users()->where('user_id', $uid)->first();
         if (!$user) {
-            throw new Exception("User is not in the chat.");
+            throw new ChatException("User is not in the chat.");
         }
 
         // Toggle role
