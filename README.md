@@ -43,7 +43,7 @@ php artisan storage:link
 
 Customize settings in `config/chat.php`:
 
-#### Pagination:
+01. #### Pagination:
 
 Enable or disable pagination:
 
@@ -51,7 +51,7 @@ Enable or disable pagination:
 'pagination' => true,
 ```
 
-#### Activity Messages
+02. #### Activity Messages
 
 Automatically generated for:
 
@@ -66,7 +66,7 @@ You can disable all activity messages globally:
 'enable_activity_messages' => false,
 ```
 
-#### User Model Configuration
+03. #### User Model Configuration
 
 Define how user information (name and avatar) is retrieved:
 
@@ -83,6 +83,8 @@ Define how user information (name and avatar) is retrieved:
 #### 📚 API Endpoints
 
 All routes are prefixed by the config value `chat.prefix` (default: chat) and use the `chat.middleware` middleware group.
+
+*Middleware:* `auth:sanctum` is required.
 
 #### 🔍 Chat List & Info
 
@@ -130,21 +132,6 @@ All routes are prefixed by the config value `chat.prefix` (default: chat) and us
 | POST   | `/{id}/messages/{mid}/likes` | Like/unlike a message          |
 | GET    | `/{id}/messages/{mid}/views` | Get users who viewed a message |
 | POST   | `/{id}/messages/{mid}/views` | Mark message as viewed         |
-
-## 🔔 Activity Messages
-
-Automatically generated for:
-
-- Group creation
-- User added/removed
-- Group settings updated
-- User left the chat
-
-Disable globally in `config/chat.php`:
-
-```php
-'enable_activity_messages' => false,
-```
 
 ## 📄 License
 
