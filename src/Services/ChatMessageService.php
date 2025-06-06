@@ -141,7 +141,7 @@ class ChatMessageService extends BaseService
     public function viewMessage($chat, $mid)
     {
         $message = $chat->messages()->where('type', ChatMessage::MESSAGE)->findOrFail($mid);
-        $view = $message->views()->create(['user_id' => auth()->id()]);
+        $view = $message->views()->firstOrCreate(['user_id' => auth()->id()]);
 
         return $view;
     }
