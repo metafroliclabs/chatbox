@@ -15,13 +15,13 @@ class ShortMessageResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->id,
-            'chat_id' => $this->chat_id,
-            'message' => $this->deleted_at ? "This message was deleted." : $this->message,
+            'id'         => $this->id,
+            'chat_id'    => $this->chat_id,
+            'message'    => $this->deleted_at ? "This message was deleted." : $this->message,
             'deleted_at' => $this->deleted_at,
             'created_at' => $this->created_at,
-            'attachment' => $this->attachment,
-            'user' => $this->user,
+            'attachment' => $this->deleted_at ? null : $this->attachment,
+            'user'       => $this->user,
         ];
     }
 }
