@@ -22,7 +22,7 @@ class ChatMessageAttachment extends Model
         return $this->belongsTo(ChatMessage::class);
     }
 
-    public function getPathAttribute($value)
+    public function getFileAttribute($value)
     {
         return $value ? asset($value) : null;
     }
