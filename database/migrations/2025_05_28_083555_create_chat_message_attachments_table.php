@@ -15,7 +15,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('chat_message_id')->constrained()->onDelete('cascade');
             $table->string('file');
-            $table->string('type');
+            $table->string('ext');
+            $table->string('type')->nullable();
             $table->timestamps();
         });
     }

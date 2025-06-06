@@ -35,7 +35,7 @@ return [
         'image_col' => 'avatar',
         'enable_image_url' => true,
     ],
-  
+
     /*
     |-------------------------------------
     | Chat messages/activity configurations
@@ -46,7 +46,7 @@ return [
 
     'enable_update_message_time' => true,
     'update_message_time_limit' => 60,
-    
+
     'enable_delete_message_time' => true,
     'delete_message_time_limit' => 60,
 
@@ -60,5 +60,13 @@ return [
         'disk' => env('CHAT_FILE_DISK', 'public'),
         'upload_folder' => 'attachments',
         'default_prefix' => 'File',
+        'max_size' => 10240,
+    ],
+
+    'media_types' => [
+        'image' => [],
+        'video' => [],
+        'audio' => [],
+        'document' => [],
     ],
 ];

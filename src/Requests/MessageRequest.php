@@ -25,7 +25,7 @@ class MessageRequest extends FormRequest
             'message' => 'required_without:attachments',
             'reply_to' => 'nullable|exists:chat_messages,id', 
             'attachments' => 'nullable|array|max:10',
-            'attachments.*' => 'required|file|max:10240',
+            'attachments.*' => 'required|file|max:' . config('chat.file.max_size'),
         ];
     }
 }

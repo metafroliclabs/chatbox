@@ -11,7 +11,8 @@ class ChatMessageAttachment extends Model
 
     protected $fillable = [
         'chat_message_id',
-        'path',
+        'file',
+        'ext',
         'type',
     ];
 

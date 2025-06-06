@@ -74,10 +74,16 @@ class ChatMessageService extends BaseService
     {
         $authId = auth()->id();
         $setting = $chat->setting;
+        $replyId = null;
 
         $authPivot = $chat->users()->where('user_id', $authId)->first();
         if ($chat->type === Chat::GROUP && !$setting->can_send_messages && $authPivot->pivot->role !== Chat::ADMIN) {
             throw new ChatException("Only admins are allowed to send messages");
+        }
+
+        if ($request->reply_id) {
+            $message = $chat->messages()->findOrFail($request->reply_id);
+            $replyId = $message->type === ChatMessage::MESSAGE ? $request->reply_id : null;
         }
 
         $messages = array();
@@ -97,7 +103,7 @@ class ChatMessageService extends BaseService
             $message = $chat->messages()->create([
                 'user_id' => $authId,
                 'message' => $request->message,
-                'replied_to_message_id' => $request->reply_to ?? null
+                'replied_to_message_id' => $replyId
             ]);
             $messages[] = $message;
         }
