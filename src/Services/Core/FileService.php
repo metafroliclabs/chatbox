@@ -4,13 +4,34 @@ namespace Metafroliclabs\LaravelChat\Services\Core;
 
 use Illuminate\Support\Facades\Storage;
 use Metafroliclabs\LaravelChat\Exceptions\ChatException;
+use Illuminate\Http\UploadedFile;
 
 class FileService
 {
+    /**
+     * The configured filesystem disk to store files.
+     *
+     * @var string
+     */
     protected string $disk;
+
+    /**
+     * The default upload folder.
+     *
+     * @var string
+     */
     protected string $folder;
+
+    /**
+     * The default prefix for file names.
+     *
+     * @var string
+     */
     protected string $prefix;
 
+    /**
+     * Initialize the FileService with configuration values.
+     */
     public function __construct()
     {
         $this->disk = config('chat.file.disk');
@@ -18,28 +39,27 @@ class FileService
         $this->prefix = config('chat.file.default_prefix');
     }
 
-    protected function success($data = []): array
-    {
-        return [
-            'status' => true,
-            'data' => $data,
-        ];
-    }
-
-    protected function successMessage(string $message): array
-    {
-        return [
-            'status' => true,
-            'message' => $message,
-        ];
-    }
-
+    /**
+     * Generate a unique filename using prefix, timestamp, and key.
+     *
+     * @param  string  $prefix
+     * @param  string  $extension
+     * @param  int  $key
+     * @return string
+     */
     protected function generateFilename(string $prefix, string $extension, int $key): string
     {
         $timestamp = now()->format('YmdHis');
         return "{$prefix}_{$timestamp}_{$key}.{$extension}";
     }
 
+    /**
+     * Detect the file type based on file extension.
+     * Falls back to 'file' if the type is unknown.
+     *
+     * @param  string  $extension
+     * @return string
+     */
     protected function detectFileType(string $extension): string
     {
         $extension = strtolower($extension);
@@ -51,9 +71,7 @@ class FileService
             'document' => ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt'],
         ];
 
-        // Merge with user-defined extensions from config
-        $customTypes = config('chat.media_types', []);
-
+        $customTypes = config('chat.file.types', []);
         $mergedTypes = array_merge_recursive($defaultTypes, $customTypes);
 
         foreach ($mergedTypes as $type => $extensions) {
@@ -62,9 +80,20 @@ class FileService
             }
         }
 
-        return 'file'; // fallback
+        return 'file';
     }
 
+    /**
+     * Upload a single file to the configured storage disk.
+     *
+     * @param  UploadedFile  $file
+     * @param  string|null  $prefix
+     * @param  string|null  $folder
+     * @param  int  $key
+     * @return array
+     *
+     * @throws ChatException
+     */
     public function uploadFile($file, ?string $prefix = null, ?string $folder = null, int $key = 0): array
     {
         $prefix = $prefix ?? $this->prefix;
@@ -79,12 +108,25 @@ class FileService
         $path = $file->storeAs($directory, $filename, $this->disk);
 
         if ($path) {
-            return $this->success(Storage::url($path));
+            return [
+                'status' => true,
+                'data' => Storage::url($path)
+            ];
         }
 
         throw new ChatException("File could not be uploaded");
     }
 
+    /**
+     * Upload multiple files and return their URLs with type info.
+     *
+     * @param  UploadedFile[]  $files
+     * @param  string|null  $prefix
+     * @param  string|null  $folder
+     * @return array
+     *
+     * @throws ChatException
+     */
     public function uploadMultipleFiles(array $files, ?string $prefix = null, ?string $folder = null): array
     {
         $response = [];
@@ -103,6 +145,9 @@ class FileService
             }
         }
 
-        return $this->success($response);
+        return [
+            'status' => true,
+            'data' => $response
+        ];
     }
 }

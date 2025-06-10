@@ -61,12 +61,6 @@ return [
         'upload_folder' => 'attachments',
         'default_prefix' => 'File',
         'max_size' => 10240,
-    ],
-
-    'media_types' => [
-        'image' => [],
-        'video' => [],
-        'audio' => [],
-        'document' => [],
+        'types' => []
     ],
 ];

@@ -19,35 +19,10 @@ class ChatResource extends JsonResource
         $user = $this->users->where('id', '!=', auth()->id())->first();
         $private = ($this->type === Chat::PRIVATE) ? true : false;
 
-        // user name column
-        $fullname = "";
-        $cols = config('chat.user.name_cols', []);
-        if ($user && !empty($cols)) {
-            $fullname = collect($cols)
-                ->map(fn($col) => $user->{$col} ?? '')
-                ->filter() // remove null or empty values
-                ->implode(' ');
-        }
-
-        // user image column
-        $avatar = null;
-        if ($user) {
-            $image_col = config('chat.user.image_col', 'avatar');
-            $image_url = config('chat.user.enable_image_url', true);
-            $image_val = $user->{$image_col} ?? null;
-            if ($image_val) {
-                $avatar = $image_url ? asset($image_val) : $image_val;
-            }
-        }
-
-        // unread messages count
-        $count = $this->messages
-            ->where('user_id', '!=', auth()->id())
-            ->where('type', ChatMessage::MESSAGE)
-            ->where('created_at', '>=', $user->pivot?->created_at)
-            ->where('created_at', '>=', $user->pivot?->cleared_at)
-            ->reject(fn($message) => $message->views->where('user_id', auth()->id())->isNotEmpty())
-            ->count();
+        $fullname = $this->getUserFullname($user);
+        $avatar = $this->getUserAvatar($user);
+        $count = $this->getUnreadMessagesCount($user);
+        $message = $this->getLastVisibleMessage();
 
         return [
             'id' => $this->id,
@@ -55,9 +30,53 @@ class ChatResource extends JsonResource
             'name' => $this->when($private, $fullname, $this->name),
             'image' => $this->when($private, $avatar, $this->image),
             'unread' => $count,
-            'last_message' => new ShortMessageResource($this->getLastVisibleMessage()),
+            'last_message' => new ShortMessageResource($message),
             'setting' => $this->setting
         ];
+    }
+
+    protected function getUserFullname($user)
+    {
+        $fullname = "";
+        $cols = config('chat.user.name_cols', []);
+
+        if ($user && !empty($cols)) {
+            $fullname = collect($cols)
+                ->map(fn($col) => $user->{$col} ?? '')
+                ->filter() // remove null or empty values
+                ->implode(' ');
+        }
+
+        return $fullname;
+    }
+
+    protected function getUserAvatar($user)
+    {
+        $avatar = null;
+        $image_col = config('chat.user.image_col', 'avatar');
+        $image_url = config('chat.user.enable_image_url', true);
+
+        if ($user) {
+            $image_val = $user->{$image_col} ?? null;
+            if ($image_val) {
+                $avatar = $image_url ? asset($image_val) : $image_val;
+            }
+        }
+
+        return $avatar;
+    }
+
+    protected function getUnreadMessagesCount($user)
+    {
+        $count = $this->messages
+        ->where('user_id', '!=', auth()->id())
+        ->where('type', ChatMessage::MESSAGE)
+        ->where('created_at', '>=', $user->pivot?->created_at)
+        ->where('created_at', '>=', $user->pivot?->cleared_at)
+        ->reject(fn($message) => $message->views->where('user_id', auth()->id())->isNotEmpty())
+        ->count();
+
+        return $count ?? 0;
     }
 
     protected function getLastVisibleMessage()

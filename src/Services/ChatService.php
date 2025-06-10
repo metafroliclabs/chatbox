@@ -61,6 +61,7 @@ class ChatService extends BaseService
         $query->orderByDesc(
             ChatMessage::select('created_at')
                 ->whereColumn('chat_id', 'chats.id')
+                ->where('type', ChatMessage::MESSAGE)
                 ->orderByDesc('created_at')
                 ->limit(1)
         );
@@ -119,6 +120,7 @@ class ChatService extends BaseService
         $query->orderByDesc(
             ChatMessage::select('created_at')
                 ->whereColumn('chat_id', 'chats.id')
+                ->where('type', ChatMessage::MESSAGE)
                 ->orderByDesc('created_at')
                 ->limit(1)
         );
