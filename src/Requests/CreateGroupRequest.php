@@ -21,19 +21,25 @@ class CreateGroupRequest extends FormRequest
      */
     public function rules(): array
     {
+        $minUsers = config('chat.min_group_users', 2);
+        $maxUsers = config('chat.max_group_users', 9);
+
         return [
             'name' => 'required|string',
             'picture' => 'nullable|image|mimes:jpeg,png,jpg|max:4096',
-            'users' => 'required|array|min:2|max:9',
+            'users' => ['required', 'array', "min:$minUsers", "max:$maxUsers"],
             'users.*' => 'required|exists:users,id',
         ];
     }
 
     public function messages(): array
     {
+        $minUsers = config('chat.min_group_users', 2);
+        $maxUsers = config('chat.max_group_users', 9);
+
         return [
-            'users.min' => 'Group must have at least 2 members',
-            'users.max' => 'Group can have max 9 members',
+            'users.min' => "Group must have at least $minUsers members",
+            'users.max' => "Group can have max $maxUsers members",
         ];
     }
 }
