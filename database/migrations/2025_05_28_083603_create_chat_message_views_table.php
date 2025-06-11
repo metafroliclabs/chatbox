@@ -16,6 +16,8 @@ return new class extends Migration
             $table->foreignId('chat_message_id')->constrained()->onDelete('cascade');
             $table->unsignedInteger('user_id');
             $table->timestamps();
+
+            $table->unique(['chat_message_id', 'user_id']);
         });
     }
 

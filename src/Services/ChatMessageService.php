@@ -47,7 +47,10 @@ class ChatMessageService extends BaseService
 
         // Get IDs of messages not yet viewed by the current user and not sent by the user
         $unseenMessages = $messages->filter(function ($msg) use ($authId) {
-            return $msg->user_id !== $authId && $msg->type !== ChatMessage::ACTIVITY && !$msg->views->contains('user_id', $authId);
+            return is_null($msg->deleted_at) // only mark not-deleted messages
+                && $msg->user_id !== $authId
+                && $msg->type !== ChatMessage::ACTIVITY
+                && !$msg->views->contains('user_id', $authId);
         });
 
         // Prepare insert data
@@ -83,7 +86,10 @@ class ChatMessageService extends BaseService
 
         if ($request->reply_id) {
             $message = $chat->messages()->findOrFail($request->reply_id);
-            $replyId = $message->type === ChatMessage::MESSAGE ? $request->reply_id : null;
+
+            if ($message->type === ChatMessage::MESSAGE && is_null($message->deleted_at)) {
+                $replyId = $request->reply_id;
+            }
         }
 
         $messages = array();
@@ -114,13 +120,21 @@ class ChatMessageService extends BaseService
 
     public function getMessageLikes($chat, $mid)
     {
-        $message = $chat->messages()->where('type', ChatMessage::MESSAGE)->findOrFail($mid);
+        $message = $chat->messages()
+            ->where('type', ChatMessage::MESSAGE)
+            ->whereNull('deleted_at')
+            ->findOrFail($mid);
+
         return $message->reactions()->get();
     }
 
     public function toggleLike($chat, $mid)
     {
-        $message = $chat->messages()->where('type', ChatMessage::MESSAGE)->findOrFail($mid);
+        $message = $chat->messages()
+            ->where('type', ChatMessage::MESSAGE)
+            ->whereNull('deleted_at')
+            ->findOrFail($mid);
+
         $isLiked = $message->reactions()->where('user_id', auth()->id())->first();
 
         if ($isLiked) {
@@ -134,13 +148,21 @@ class ChatMessageService extends BaseService
 
     public function getMessageViews($chat, $mid)
     {
-        $message = $chat->messages()->where('type', ChatMessage::MESSAGE)->findOrFail($mid);
+        $message = $chat->messages()
+            ->where('type', ChatMessage::MESSAGE)
+            ->whereNull('deleted_at')
+            ->findOrFail($mid);
+
         return $message->views()->get();
     }
 
     public function viewMessage($chat, $mid)
     {
-        $message = $chat->messages()->where('type', ChatMessage::MESSAGE)->findOrFail($mid);
+        $message = $chat->messages()
+            ->where('type', ChatMessage::MESSAGE)
+            ->whereNull('deleted_at')
+            ->findOrFail($mid);
+
         $view = $message->views()->firstOrCreate(['user_id' => auth()->id()]);
 
         return $view;
@@ -152,7 +174,10 @@ class ChatMessageService extends BaseService
         $update_time_limit = config('chat.update_message_time_limit', 60);
 
         $authId = auth()->id();
-        $message = $chat->messages()->where('type', ChatMessage::MESSAGE)->findOrFail($mid);
+        $message = $chat->messages()
+            ->where('type', ChatMessage::MESSAGE)
+            ->whereNull('deleted_at')
+            ->findOrFail($mid);
 
         if ($message->user_id !== $authId) {
             throw new ChatException("You can only update your own message.");
@@ -181,6 +206,10 @@ class ChatMessageService extends BaseService
         if ($deleteForEveryone) {
             $enable_delete_time = config('chat.enable_delete_message_time', true);
             $delete_time_limit = config('chat.delete_message_time_limit', 60);
+
+            if (!is_null($message->deleted_at)) {
+                throw new ChatException("Message has already been deleted for everyone.");
+            }
 
             // Only sender can delete for everyone
             if ($message->user_id !== $authId) {
