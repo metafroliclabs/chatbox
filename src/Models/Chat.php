@@ -40,7 +40,7 @@ class Chat extends Model
     {
         return $this->belongsToMany(User::class, 'chat_users')->withPivot('role', 'bg_notification', 'cleared_at', 'created_at');
     }
-    
+
     // public function users()
     // {
     //     return $this->hasMany(ChatUser::class);
@@ -55,5 +55,18 @@ class Chat extends Model
     public function getImageAttribute($value)
     {
         return $value ? asset($value) : null;
+    }
+
+    // Scopes
+    public function scopeOrderByLatestActivity($query)
+    {
+        return $query->addSelect([
+            'latest_message_at' => ChatMessage::select('created_at')
+                ->whereColumn('chat_id', 'chats.id')
+                ->where('type', ChatMessage::MESSAGE)
+                ->latest('created_at')
+                ->limit(1),
+        ])
+            ->orderByRaw('COALESCE(latest_message_at, chats.created_at) DESC');
     }
 }

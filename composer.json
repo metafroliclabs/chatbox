@@ -1,6 +1,6 @@
 {
     "name": "metafroliclabs/laravel-chat",
-    "description": "This is a complete laravel chat application package for our organization.",
+    "description": "A powerful and customizable chat system built for Laravel applications. This package supports private and group chats, media sharing, chat settings, user roles, activity messages, and more.",
     "type": "library",
     "keywords": [
         "laravel",
@@ -10,6 +10,9 @@
         "php"
       ],
     "license": "MIT",
+    "require": {
+        "php": "^8.1"
+    },
     "autoload": {
         "psr-4": {
             "Metafroliclabs\\LaravelChat\\": "src/"
@@ -32,6 +35,5 @@
         }
     },
     "minimum-stability": "dev",
-    "prefer-stable": true,
-    "require": {}
+    "prefer-stable": true
 }

@@ -57,14 +57,8 @@ class ChatService extends BaseService
             $query->where('type', $request->type);
         }
 
-        // Order by latest message
-        $query->orderByDesc(
-            ChatMessage::select('created_at')
-                ->whereColumn('chat_id', 'chats.id')
-                ->where('type', ChatMessage::MESSAGE)
-                ->orderByDesc('created_at')
-                ->limit(1)
-        );
+        // Order by latest_message if exists, otherwise chats.created_at
+        $query->orderByLatestActivity();
 
         return $this->pagination ? $query->paginate($this->per_page) : $query->get();
     }
@@ -116,14 +110,8 @@ class ChatService extends BaseService
             $query->where('type', $request->type);
         }
 
-        // Order by latest message timestamp
-        $query->orderByDesc(
-            ChatMessage::select('created_at')
-                ->whereColumn('chat_id', 'chats.id')
-                ->where('type', ChatMessage::MESSAGE)
-                ->orderByDesc('created_at')
-                ->limit(1)
-        );
+        // Order by latest_message if exists, otherwise chats.created_at
+        $query->orderByLatestActivity();
 
         return $this->pagination ? $query->paginate($this->per_page) : $query->get();
     }
