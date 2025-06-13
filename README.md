@@ -22,16 +22,21 @@ A powerful and customizable chat system built for Laravel applications. This pac
 composer require metafroliclabs/laravel-chat
 ```
 
-Publish configuration file & run migrations:
+```php
+php artisan chat:install
+```
+
+Or, manually publish configuration file:
 
 ```bash
 php artisan vendor:publish --tag=chat-config
-php artisan migrate
 ```
 
-## 📁 File Uploads
+Run migrations:
 
-Supports media upload (image, video, file).
+```php
+php artisan migrate
+```
 
 Make sure storage is linked:
 
@@ -43,7 +48,7 @@ php artisan storage:link
 
 Customize settings in `config/chat.php`:
 
-01. #### Pagination:
+1.  #### Pagination:
 
 Enable or disable pagination:
 
@@ -51,7 +56,7 @@ Enable or disable pagination:
 'pagination' => true,
 ```
 
-02. #### Activity Messages
+2.  #### Activity Messages
 
 Automatically generated for:
 
@@ -66,7 +71,7 @@ You can disable all activity messages globally:
 'enable_activity_messages' => false,
 ```
 
-03. #### User Model Configuration
+3.  #### User Model Configuration
 
 Define how user information (name and avatar) is retrieved:
 
@@ -84,7 +89,7 @@ Define how user information (name and avatar) is retrieved:
 
 All routes are prefixed by the config value `chat.prefix` (default: chat) and use the `chat.middleware` middleware group.
 
-*Middleware:* `auth:sanctum` is required.
+_Middleware:_ `auth:sanctum` is required.
 
 #### 🔍 Chat List & Info
 

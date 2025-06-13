@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use Metafroliclabs\LaravelChat\Contracts\ChatResponseContract;
 use Metafroliclabs\LaravelChat\Services\Core\ChatResponseService;
 use Metafroliclabs\LaravelChat\Services\Core\FileService;
+use Metafroliclabs\LaravelChat\Console\InstallCommand;
 
 class ChatServiceProvider extends ServiceProvider
 {
@@ -19,6 +20,11 @@ class ChatServiceProvider extends ServiceProvider
         $this->app->singleton(FileService::class);
 
         $this->mergeConfigFrom(__DIR__ . '/../config/chat.php', 'chat');
+
+        // Register commands
+        $this->commands([
+            InstallCommand::class,
+        ]);
     }
 
     /**
@@ -28,7 +34,12 @@ class ChatServiceProvider extends ServiceProvider
     {
         $this->loadRoutesFrom(__DIR__ . '/../routes/chat.php');
         $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+        
+        $this->setPublishes();
+    }
 
+    protected function setPublishes()
+    {
         // Migrations
         // $this->publishes([
         //     __DIR__ . '/../database/migrations/' => database_path('migrations')
