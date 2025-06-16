@@ -118,6 +118,64 @@ class ChatMessageService extends BaseService
         return $messages;
     }
 
+    public function forwardMessages($chat, $request)
+    {
+        $authId = auth()->id();
+        $forwardedMessages = [];
+
+        // Fetch all messages to forward (with necessary relations)
+        $originalMessages = $chat->messages()
+            ->where('type', ChatMessage::MESSAGE)
+            ->whereNull('deleted_at')
+            ->whereIn('id', $request->messages)
+            ->get();
+
+        DB::beginTransaction();
+
+        $chats = Chat::whereHas('users', function ($q) use ($authId) {
+            $q->where('user_id', $authId);
+        })
+            ->whereIn('id', $request->chats)
+            ->get();
+
+        foreach ($chats as $chatData) {
+            // Check if the user is allowed to send messages in this chat
+            $setting = $chatData->setting;
+            $authPivot = $chatData->users()->where('user_id', $authId)->first();
+
+            if (
+                $chatData->type === Chat::GROUP &&
+                !$setting->can_send_messages &&
+                $authPivot->pivot->role !== Chat::ADMIN
+            ) {
+                continue; // Skip this chat if not allowed
+            }
+
+            foreach ($originalMessages as $original) {
+                // Create the new forwarded message
+                $newMessage = $chatData->messages()->create([
+                    'user_id' => $authId,
+                    'message' => $original->message,
+                    'is_forwarded' => true,
+                ]);
+
+                // Copy attachment if it exists
+                if ($original->attachment) {
+                    $newMessage->attachment()->create([
+                        'file' => $original->attachment->file,
+                        'ext' => $original->attachment->ext,
+                        'type' => $original->attachment->type,
+                    ]);
+                }
+
+                $forwardedMessages[] = $newMessage;
+            }
+        }
+        DB::commit();
+
+        return $forwardedMessages;
+    }
+
     public function getMessageLikes($chat, $mid)
     {
         $message = $chat->messages()

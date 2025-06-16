@@ -19,6 +19,7 @@ return new class extends Migration
             $table->text('message')->nullable();
             $table->unsignedInteger('replied_to_message_id')->nullable();
             $table->boolean('is_updated')->default(false);
+            $table->boolean('is_forwarded')->default(false);
             $table->softDeletes();
             $table->timestamps();
         });

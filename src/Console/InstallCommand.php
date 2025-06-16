@@ -21,9 +21,9 @@ class InstallCommand extends Command
         }
 
         $this->publishConfig();
+        $this->createStorageLink();
         // $this->publishMigrations();
         $this->runMigrations();
-        $this->createStorageLink();
 
         $this->info('Laravel Chat Package installed successfully!');
         // $this->info('Please run "php artisan migrate" to create the database tables.');

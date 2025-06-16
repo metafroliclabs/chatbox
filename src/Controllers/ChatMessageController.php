@@ -4,6 +4,7 @@ namespace Metafroliclabs\LaravelChat\Controllers;
 
 use Illuminate\Http\Request;
 use Metafroliclabs\LaravelChat\Contracts\ChatResponseContract;
+use Metafroliclabs\LaravelChat\Requests\ForwardMessageRequest;
 use Metafroliclabs\LaravelChat\Requests\MessageRequest;
 use Metafroliclabs\LaravelChat\Resources\DefaultResource;
 use Metafroliclabs\LaravelChat\Resources\MessageResource;
@@ -44,6 +45,13 @@ class ChatMessageController extends Controller
         $chat = $this->chatService->get_chat($id);
         $messages = $this->messageService->sendMessage($chat, $request);
         return $this->response->success(MessageResource::collection($messages));
+    }
+
+    public function forward_messages(ForwardMessageRequest $request, $id)
+    {
+        $chat = $this->chatService->get_chat($id);
+        $messages = $this->messageService->forwardMessages($chat, $request);
+        return $this->response->success(['message' => "Messages have been forwarded"]);
     }
 
     public function get_message_likes($id, $mid)

@@ -15,18 +15,19 @@ class MessageResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id'         => $this->id,
-            'type'       => $this->type,
-            'chat_id'    => $this->chat_id,
-            'message'    => $this->deleted_at ? "This message was deleted." : $this->message,
-            'is_updated' => $this->is_updated,
-            'deleted_at' => $this->deleted_at,
-            'created_at' => $this->created_at,
-            'user'       => $this->user,
-            'repliedTo'  => $this->deleted_at ? null : new ShortMessageResource($this->repliedTo),
-            'attachment' => $this->deleted_at ? null : $this->attachment,
-            'reactions'  => $this->deleted_at ? [] : $this->reactions,
-            'views'      => $this->deleted_at ? [] : $this->views,
+            'id'           => $this->id,
+            'type'         => $this->type,
+            'chat_id'      => $this->chat_id,
+            'message'      => $this->deleted_at ? "This message was deleted." : $this->message,
+            'is_updated'   => $this->is_updated,
+            'is_forwarded' => $this->is_forwarded,
+            'deleted_at'   => $this->deleted_at,
+            'created_at'   => $this->created_at,
+            'user'         => $this->user,
+            'repliedTo'    => $this->deleted_at ? null : new ShortMessageResource($this->repliedTo),
+            'attachment'   => $this->deleted_at ? null : $this->attachment,
+            'reactions'    => $this->deleted_at ? [] : $this->reactions,
+            'views'        => $this->deleted_at ? [] : $this->views,
         ];
     }
 }

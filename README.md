@@ -126,6 +126,7 @@ _Middleware:_ `auth:sanctum` is required.
 | ------ | ----------------------------- | -------------------------- |
 | GET    | `/{id}/messages`              | Get all messages in a chat |
 | POST   | `/{id}/messages`              | Send a new message         |
+| POST   | `/{id}/messages/forward`      | Forward messages           |
 | POST   | `/{id}/messages/{mid}/update` | Update a message           |
 | POST   | `/{id}/messages/{mid}/delete` | Delete a message           |
 
