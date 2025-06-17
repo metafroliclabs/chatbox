@@ -65,7 +65,7 @@ class ChatController extends Controller
 
     public function create_group(CreateGroupRequest $request)
     {
-        $chat = $this->chatService->create_chat_group($request);
+        $chat = $this->chatService->create_chat_group($request->all());
         return $this->response->success(new ChatResource($chat));
     }
 

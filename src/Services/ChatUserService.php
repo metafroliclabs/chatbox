@@ -20,7 +20,7 @@ class ChatUserService extends BaseService
         return $chat->users;
     }
 
-    public function add_users($request, $id)
+    public function add_users($userIds, $id)
     {
         $authId = auth()->id();
 
@@ -42,7 +42,7 @@ class ChatUserService extends BaseService
         $existingUserIds = $chat->users()->pluck('user_id')->toArray();
         $userTimestamps = [];
 
-        foreach ($request->users as $userId) {
+        foreach ($userIds as $userId) {
             if ($userId == $authId || in_array($userId, $existingUserIds)) {
                 continue; // Skip if self or already in chat
             }
@@ -79,7 +79,7 @@ class ChatUserService extends BaseService
         return $chat->users;
     }
 
-    public function remove_users($request, $id)
+    public function remove_users($userIds, $id)
     {
         $authId = auth()->id();
 
@@ -100,14 +100,9 @@ class ChatUserService extends BaseService
         $existingUserIds = $chat->users()->pluck('user_id')->toArray();
 
         // Determine users to remove (exclude self, and non-members)
-        $removableUserIds = array_filter($request->users, function ($userId) use ($authId, $existingUserIds) {
+        $removableUserIds = array_filter($userIds, function ($userId) use ($authId, $existingUserIds) {
             return $userId != $authId && in_array($userId, $existingUserIds);
         });
-
-        // Detach the selected users
-        if (!empty($removableUserIds)) {
-            $chat->users()->detach($removableUserIds);
-        }
 
         if (!empty($removableUserIds)) {
             // Fetch removed user names

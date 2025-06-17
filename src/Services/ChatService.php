@@ -179,19 +179,19 @@ class ChatService extends BaseService
         return $newChat;
     }
 
-    public function create_chat_group($request)
+    public function create_chat_group($data)
     {
         $authId = auth()->id();
         $image = null;
 
-        if ($request->hasFile('picture')) {
-            $image = $this->fileService->uploadFile($request->picture, 'File', 'chat');
+        if (isset($data['picture'])) {
+            $image = $this->fileService->uploadFile($data['picture'], 'File', 'chat');
         }
 
         DB::beginTransaction();
         $chat = Chat::create([
             'type' => Chat::GROUP,
-            'name' => $request->name,
+            'name' => $data['name'],
             'image' => $image ? $image['data'] : $image,
             'created_by' => $authId
         ]);
@@ -200,7 +200,7 @@ class ChatService extends BaseService
         $chat->setting()->create();
 
         // create group creation activity
-        $message = $this->getFullName(auth()->user()) . ' created the group "' . $request->name . '"';
+        $message = $this->getFullName(auth()->user()) . ' created the group "' . $data['name'] . '"';
         $this->logActivity($chat, $message);
 
         // Attach creator as admin
@@ -212,7 +212,7 @@ class ChatService extends BaseService
 
         // Attach other users
         $userTimestamps = [];
-        foreach ($request->users as $userId) {
+        foreach ($data['users'] as $userId) {
             if ($userId == $authId) continue; // Skip if already added
 
             $userTimestamps[$userId] = [

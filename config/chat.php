@@ -69,9 +69,9 @@ return [
 
     'file' => [
         'disk' => env('CHAT_FILE_DISK', 'public'),
-        'upload_folder' => 'attachments',
-        'default_prefix' => 'File',
+        'folder' => 'attachments',
+        'prefix' => 'File',
         'max_size' => 10240, // 10MB
-        'types' => []
+        'max_files' => 10
     ],
 ];

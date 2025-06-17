@@ -27,13 +27,13 @@ class ChatUserController extends Controller
 
     public function add_users(UsersRequest $request, $id)
     {
-        $users = $this->chatUserService->add_users($request, $id);
+        $users = $this->chatUserService->add_users($request->users, $id);
         return $this->response->success(DefaultResource::collection($users));
     }
 
     public function remove_users(UsersRequest $request, $id)
     {
-        $users = $this->chatUserService->remove_users($request, $id);
+        $users = $this->chatUserService->remove_users($request->users, $id);
         return $this->response->success(DefaultResource::collection($users));
     }
 

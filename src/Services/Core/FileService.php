@@ -35,8 +35,8 @@ class FileService
     public function __construct()
     {
         $this->disk = config('chat.file.disk');
-        $this->folder = config('chat.file.upload_folder');
-        $this->prefix = config('chat.file.default_prefix');
+        $this->folder = config('chat.file.folder');
+        $this->prefix = config('chat.file.prefix');
     }
 
     /**
