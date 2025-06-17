@@ -21,8 +21,8 @@ class CreateGroupRequest extends FormRequest
      */
     public function rules(): array
     {
-        $minUsers = config('chat.min_group_users', 2);
-        $maxUsers = config('chat.max_group_users', 9);
+        $minUsers = config('chat.group.min_users', 2);
+        $maxUsers = config('chat.group.max_users', 9);
 
         return [
             'name' => 'required|string',
@@ -34,8 +34,8 @@ class CreateGroupRequest extends FormRequest
 
     public function messages(): array
     {
-        $minUsers = config('chat.min_group_users', 2);
-        $maxUsers = config('chat.max_group_users', 9);
+        $minUsers = config('chat.group.min_users', 2);
+        $maxUsers = config('chat.group.max_users', 9);
 
         return [
             'users.min' => "Group must have at least $minUsers members",

@@ -84,7 +84,7 @@ class BaseService
      */
     protected function logActivity($chat, string|array $message, ?int $userId = null): void
     {
-        if (!config('chat.enable_activity_messages', true)) {
+        if (!config('chat.message.enable_activity', true)) {
             return;
         }
 

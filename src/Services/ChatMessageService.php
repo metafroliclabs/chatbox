@@ -228,8 +228,8 @@ class ChatMessageService extends BaseService
 
     public function updateMessage($request, $chat, $mid)
     {
-        $enable_update_time = config('chat.enable_update_message_time', true);
-        $update_time_limit = config('chat.update_message_time_limit', 60);
+        $enable_update_time = config('chat.message.enable_update_time', true);
+        $update_time_limit = config('chat.message.update_time_limit', 60);
 
         $authId = auth()->id();
         $message = $chat->messages()
@@ -262,8 +262,8 @@ class ChatMessageService extends BaseService
         $deleteForEveryone = $request->boolean('delete_for_everyone');
 
         if ($deleteForEveryone) {
-            $enable_delete_time = config('chat.enable_delete_message_time', true);
-            $delete_time_limit = config('chat.delete_message_time_limit', 60);
+            $enable_delete_time = config('chat.message.enable_delete_time', true);
+            $delete_time_limit = config('chat.message.delete_time_limit', 60);
 
             if (!is_null($message->deleted_at)) {
                 throw new ChatException("Message has already been deleted for everyone.");

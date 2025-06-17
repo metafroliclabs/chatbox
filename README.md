@@ -22,7 +22,7 @@ A powerful and customizable chat system built for Laravel applications. This pac
 composer require metafroliclabs/laravel-chat
 ```
 
-```php
+```bash
 php artisan chat:install
 ```
 
@@ -34,13 +34,13 @@ php artisan vendor:publish --tag=chat-config
 
 Run migrations:
 
-```php
+```bash
 php artisan migrate
 ```
 
 Make sure storage is linked:
 
-```php
+```bash
 php artisan storage:link
 ```
 
@@ -68,7 +68,9 @@ Automatically generated for:
 You can disable all activity messages globally:
 
 ```php
-'enable_activity_messages' => false,
+'message' => [
+    'enable_activity' =>  false,
+]
 ```
 
 3.  #### User Model Configuration
@@ -80,7 +82,7 @@ Define how user information (name and avatar) is retrieved:
     'name_cols' => ['first_name', 'last_name'], // Columns to build full name
     'image_col' => 'avatar',                    // Column for profile picture
     'enable_image_url' => true,                 // If true, image will be URL
-],
+]
 ```
 
 ## 🧠 Usage

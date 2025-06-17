@@ -26,7 +26,7 @@ return [
     |-------------------------------------
     |
     | Specify the column(s) used to retrieve 
-    | user names from the "users" table.
+    | user data from the "users" table.
     |
     */
 
@@ -38,26 +38,28 @@ return [
 
     /*
     |-------------------------------------
-    | Chat messages/activity configurations
+    | Chat messages configurations
     |-------------------------------------
     */
 
-    'enable_activity_messages' =>  true,
-
-    'enable_update_message_time' => true,
-    'update_message_time_limit' => 60,
-
-    'enable_delete_message_time' => true,
-    'delete_message_time_limit' => 60,
+    'message' => [  
+        'enable_activity' =>  true,
+        'enable_update_time' => true,
+        'update_time_limit' => 60, // mins
+        'enable_delete_time' => true,
+        'delete_time_limit' => 60,  // mins
+    ],
 
     /*
     |-------------------------------------
-    | Chat groups configurations
+    | Chat group configurations
     |-------------------------------------
     */
 
-    'min_group_users' =>  2,
-    'max_group_users' =>  9,
+    'group' => [
+        'min_users' =>  2,
+        'max_users' =>  9,
+    ],
 
     /*
     |-------------------------------------
@@ -69,7 +71,7 @@ return [
         'disk' => env('CHAT_FILE_DISK', 'public'),
         'upload_folder' => 'attachments',
         'default_prefix' => 'File',
-        'max_size' => 10240,
+        'max_size' => 10240, // 10MB
         'types' => []
     ],
 ];
