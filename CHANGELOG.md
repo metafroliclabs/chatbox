@@ -1,0 +1,37 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+## [1.1.0] - 2025-06-17
+### Changed
+- Updated service class function for more user friendy usage
+
+## [1.0.5] - 2025-06-16
+### Added
+- Support for forwarding multiple messages to multiple chats
+
+## [1.0.4] - 2025-06-13
+### Added
+- Added an artisan command to install chat
+
+## [1.0.3] - 2025-06-12
+### Changed
+- Improved chat ordering logic based on latest message or chat creation
+
+## [1.0.2] - 2025-06-11
+### Fixed
+- Prevent actions on deleted messages
+
+### Changed
+- Added configuration for chat group users
+
+## [1.0.1] - 2025-06-10
+### Changed
+- Updated resource class structure
+- Improved chat ordering logic based on type message
+
+## [1.0.0] - 2025-06-06
+- Initial release
+- Messaging system (groups, private chats)
+- Attachment support
+- Configurable file types
