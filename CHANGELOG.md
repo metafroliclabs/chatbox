@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0] - 2025-06-18
+### Added
+- Event: `MessageSent` to allow custom hooks after sending messages
+
 ## [1.1.0] - 2025-06-17
 ### Changed
 - Updated service class function for more user friendy usage

@@ -85,6 +85,68 @@ Define how user information (name and avatar) is retrieved:
 ]
 ```
 
+## 📡 Events in Laravel Chat
+
+Laravel Chat dispatches events to help you hook into the system and extend functionality such as notifications, logging, analytics, and more.
+
+### 🔥 Available Events
+
+#### `Metafroliclabs\LaravelChat\Events\MessageSent`
+
+Dispatched when a message is successfully sent in a chat.
+
+#### Event Data:
+```php
+public MessageSent(Chat $chat, array $messages, User $sender, array $receiver)
+```
+
+### ⚙️ How to Use
+
+#### Step 1: Create a Listener
+
+```bash
+php artisan make:listener HandleMessageSent
+```
+
+#### Step 2: Handle the Event
+
+```php
+namespace App\Listeners;
+
+use Metafroliclabs\LaravelChat\Events\MessageSent;
+
+class HandleMessageSent
+{
+    public function handle(MessageSent $event)
+    {
+        $chat = $event->chat;
+        $messages = $event->messages;
+        $sender = $event->sender;
+        $receiver = $event->receiver;
+
+        // Example: Send push notifications or log activity
+    }
+}
+```
+
+### 🔧 Register the Listener
+
+In your `app/Providers/EventServiceProvider.php`:
+
+```php
+protected $listen = [
+    Metafroliclabs\LaravelChat\Events\MessageSent::class => [
+        App\Listeners\HandleMessageSent::class,
+    ],
+];
+```
+
+Then run:
+
+```bash
+php artisan event:cache
+```
+
 ## 🧠 Usage
 
 #### 📚 API Endpoints

@@ -3,6 +3,7 @@
 namespace Metafroliclabs\LaravelChat\Services;
 
 use Illuminate\Support\Facades\DB;
+use Metafroliclabs\LaravelChat\Events\MessageSent;
 use Metafroliclabs\LaravelChat\Exceptions\ChatException;
 use Metafroliclabs\LaravelChat\Models\Chat;
 use Metafroliclabs\LaravelChat\Models\ChatMessage;
@@ -79,8 +80,10 @@ class ChatMessageService extends BaseService
         $setting = $chat->setting;
         $replyId = null;
 
-        $authPivot = $chat->users()->where('user_id', $authId)->first();
-        if ($chat->type === Chat::GROUP && !$setting->can_send_messages && $authPivot->pivot->role !== Chat::ADMIN) {
+        $authUser = $chat->users()->where('user_id', $authId)->first();
+        $users = $chat->users()->where('user_id', '!=', $authId)->get();
+        
+        if ($chat->type === Chat::GROUP && !$setting->can_send_messages && $authUser->pivot->role !== Chat::ADMIN) {
             throw new ChatException("Only admins are allowed to send messages");
         }
 
@@ -114,6 +117,9 @@ class ChatMessageService extends BaseService
             $messages[] = $message;
         }
         DB::commit();
+
+        // Calling event for end-user
+        event(new MessageSent($chat, $messages, $authUser, $users));
 
         return $messages;
     }
