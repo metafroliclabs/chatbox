@@ -10,6 +10,10 @@ return [
 
     'prefix' => env('CHAT_URL_PREFIX', 'api/chat'),
     'middleware' => ['api', 'auth:sanctum'],
+    'rate_limits' => [
+        'chat_creation_per_minute' => 20,
+        'messages_per_minute' => 40
+    ],
 
     /*
     |-------------------------------------

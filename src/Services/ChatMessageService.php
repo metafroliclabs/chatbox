@@ -81,7 +81,7 @@ class ChatMessageService extends BaseService
         $replyId = null;
 
         $authUser = $chat->users()->where('user_id', $authId)->first();
-        $users = $chat->users()->where('user_id', '!=', $authId)->get();
+        $users = $chat->users()->where('user_id', '!=', $authId)->where('bg_notification', true)->get();
         
         if ($chat->type === Chat::GROUP && !$setting->can_send_messages && $authUser->pivot->role !== Chat::ADMIN) {
             throw new ChatException("Only admins are allowed to send messages");

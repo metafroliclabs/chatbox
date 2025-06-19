@@ -2,7 +2,9 @@
 
 namespace Metafroliclabs\LaravelChat;
 
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\RateLimiter;
 use Metafroliclabs\LaravelChat\Contracts\ChatResponseContract;
 use Metafroliclabs\LaravelChat\Services\Core\ChatResponseService;
 use Metafroliclabs\LaravelChat\Services\Core\FileService;
@@ -34,8 +36,11 @@ class ChatServiceProvider extends ServiceProvider
     {
         $this->loadRoutesFrom(__DIR__ . '/../routes/chat.php');
         $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
-        
+
         $this->setPublishes();
+
+        // Rate limiting
+        $this->configureRateLimiting();
     }
 
     protected function setPublishes()
@@ -49,5 +54,18 @@ class ChatServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__ . '/../config/chat.php' => config_path('chat.php')
         ], 'chat-config');
+    }
+
+    protected function configureRateLimiting()
+    {
+        RateLimiter::for('chats', function ($request) {
+            return Limit::perMinute(config('chat.rate_limits.chat_creation_per_minute', 20))
+                ->by($request->user()?->id ?: $request->ip());
+        });
+
+        RateLimiter::for('messages', function ($request) {
+            return Limit::perMinute(config('chat.rate_limits.messages_per_minute', 40))
+                ->by($request->user()?->id ?: $request->ip());
+        });
     }
 }

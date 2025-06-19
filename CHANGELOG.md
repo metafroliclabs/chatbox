@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.1] - 2025-06-19
+### Added
+- Added rate limiting for messages and chat creation routes with configuration
+
+### Fixed
+- Dispatch `MessageSent` event to only those users with unmuted chat
+
 ## [1.2.0] - 2025-06-18
 ### Added
 - Event: `MessageSent` to allow custom hooks after sending messages

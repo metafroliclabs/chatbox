@@ -85,6 +85,20 @@ Define how user information (name and avatar) is retrieved:
 ]
 ```
 
+4.  #### Rate Limiting
+
+You can control how many chats a user can create and how many messages they can send per minute. These limits help prevent spam and abuse.
+
+```php
+'rate_limits' => [
+    'chat_creation_per_minute' => 20, // Max 20 chats per user per minute
+    'messages_per_minute' => 40      // Max 40 messages per user per minute
+],
+```
+
+- Limits are enforced per authenticated user (or IP if unauthenticated).
+- You can adjust these values to suit your application's needs.
+
 ## 📡 Events in Laravel Chat
 
 Laravel Chat dispatches events to help you hook into the system and extend functionality such as notifications, logging, analytics, and more.
@@ -96,6 +110,7 @@ Laravel Chat dispatches events to help you hook into the system and extend funct
 Dispatched when a message is successfully sent in a chat.
 
 #### Event Data:
+
 ```php
 public MessageSent(Chat $chat, array $messages, User $sender, array $receiver)
 ```
@@ -202,6 +217,15 @@ _Middleware:_ `auth:sanctum` is required.
 | POST   | `/{id}/messages/{mid}/likes` | Like/unlike a message          |
 | GET    | `/{id}/messages/{mid}/views` | Get users who viewed a message |
 | POST   | `/{id}/messages/{mid}/views` | Mark message as viewed         |
+
+#### ⚡ Rate Limiting
+
+Some endpoints are rate limited to prevent abuse:
+
+- **Chat Creation** (`/create`, `/create/group`): Limited to `chat_creation_per_minute` (default: 20) per user per minute.
+- **Message Sending** (`/{id}/messages`, `/{id}/messages/forward`): Limited to `messages_per_minute` (default: 40) per user per minute.
+
+If a user exceeds these limits, a `429 Too Many Requests` response will be returned by the API.
 
 ## 📄 License
 
