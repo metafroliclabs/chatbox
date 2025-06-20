@@ -48,7 +48,7 @@ php artisan storage:link
 
 Customize settings in `config/chat.php`:
 
-1.  #### Pagination:
+#### 1. Pagination:
 
 Enable or disable pagination:
 
@@ -56,7 +56,7 @@ Enable or disable pagination:
 'pagination' => true,
 ```
 
-2.  #### Activity Messages
+#### 2. Activity Messages
 
 Automatically generated for:
 
@@ -73,7 +73,7 @@ You can disable all activity messages globally:
 ]
 ```
 
-3.  #### User Model Configuration
+#### 3. User Model Configuration
 
 Define how user information (name and avatar) is retrieved:
 
@@ -85,7 +85,7 @@ Define how user information (name and avatar) is retrieved:
 ]
 ```
 
-4.  #### Rate Limiting
+#### 4. Rate Limiting
 
 You can control how many chats a user can create and how many messages they can send per minute. These limits help prevent spam and abuse.
 
