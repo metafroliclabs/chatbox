@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0] - 2025-06-23
+### Added
+- Added universal chat type support
+
 ## [1.2.1] - 2025-06-19
 ### Added
 - Added rate limiting for messages and chat creation routes with configuration
