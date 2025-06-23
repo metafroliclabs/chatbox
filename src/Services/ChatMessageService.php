@@ -10,6 +10,7 @@ use Metafroliclabs\LaravelChat\Models\ChatMessage;
 use Metafroliclabs\LaravelChat\Models\ChatMessageView;
 use Metafroliclabs\LaravelChat\Services\Core\BaseService;
 use Metafroliclabs\LaravelChat\Services\Core\FileService;
+use Metafroliclabs\LaravelChat\Support\ChatAccessPolicy;
 
 class ChatMessageService extends BaseService
 {
@@ -65,12 +66,14 @@ class ChatMessageService extends BaseService
             ];
         })->all();
 
-        // Insert unseen view records
-        if (!empty($viewData)) {
-            ChatMessageView::insert($viewData);
+        if (ChatAccessPolicy::isFeatureEnabled('views')) {
+            // Insert unseen view records
+            if (!empty($viewData)) {
+                ChatMessageView::insert($viewData);
+            }   
+            $messages->load('views');
         }
 
-        $messages->load('views');
         return $messages;
     }
 
