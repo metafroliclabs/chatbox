@@ -9,6 +9,7 @@ use Metafroliclabs\LaravelChat\Contracts\ChatResponseContract;
 use Metafroliclabs\LaravelChat\Services\Core\ChatResponseService;
 use Metafroliclabs\LaravelChat\Services\Core\FileService;
 use Metafroliclabs\LaravelChat\Console\InstallCommand;
+use Metafroliclabs\LaravelChat\Middleware\EnsureChatFeatureAllowed;
 
 class ChatServiceProvider extends ServiceProvider
 {
@@ -34,13 +35,26 @@ class ChatServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Load package assets
         $this->loadRoutesFrom(__DIR__ . '/../routes/chat.php');
         $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
 
+        // Register middleware
+        $this->setMiddleware();
+
+        // Make assets publishable
         $this->setPublishes();
 
         // Rate limiting
         $this->configureRateLimiting();
+    }
+
+    protected function setMiddleware()
+    {
+        $this->app->booted(function () {
+            $router = $this->app['router'];
+            $router->aliasMiddleware('chat.access', EnsureChatFeatureAllowed::class);
+        });
     }
 
     protected function setPublishes()

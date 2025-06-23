@@ -167,4 +167,31 @@ class ChatUserService extends BaseService
         $chat->load('users');
         return $chat->users;
     }
+
+    // For universal chat only
+    public function addUserToUniversalChat($userId)
+    {
+        $chat = Chat::where('type', Chat::GROUP)->first();
+
+        if (!$chat) {
+            $newChat = Chat::create([
+                'type' => Chat::GROUP,
+                'name' => 'World Chat',
+            ]);
+
+            $newChat->setting()->create(['can_add_users' => false, 'can_update_settings' => false]);
+
+            $newChat->users()->attach($userId, ['created_at' => now(), 'updated_at' => now()]);
+
+            return $newChat;
+        }
+
+        $user = $chat->users()->where('user_id', $userId)->first();
+        if (!$user) {
+            $chat->users()->attach($userId, ['created_at' => now(), 'updated_at' => now()]);
+        }
+
+        $chat->load('users');
+        return $chat;
+    }
 }

@@ -4,12 +4,29 @@ return [
 
     /*
     |-------------------------------------
+    | Chat configurations
+    |-------------------------------------
+    |
+    | Chat type: 'standard' (private/group chat) 
+    | or 'universal' (global chat). You can toggle
+    | optional features for universal chat.
+    |
+    */
+
+    'type' => 'standard',
+    'features' => [
+        'reactions' => true,
+        'views' => false,
+    ],
+
+    /*
+    |-------------------------------------
     | Routes configurations
     |-------------------------------------
     */
 
-    'prefix' => env('CHAT_URL_PREFIX', 'api/chat'),
-    'middleware' => ['api', 'auth:sanctum'],
+    'prefix' => 'chat',
+    'middleware' => ['auth:sanctum'],
     'rate_limits' => [
         'chat_creation_per_minute' => 20,
         'messages_per_minute' => 40
@@ -22,7 +39,7 @@ return [
     */
 
     'pagination' => false,
-    'per_page' => env('CHAT_PER_PAGE', 25),
+    'per_page' => 25,
 
     /*
     |-------------------------------------
@@ -46,7 +63,7 @@ return [
     |-------------------------------------
     */
 
-    'message' => [  
+    'message' => [
         'enable_activity' =>  true,
         'enable_update_time' => true,
         'update_time_limit' => 60, // mins
@@ -72,7 +89,7 @@ return [
     */
 
     'file' => [
-        'disk' => env('CHAT_FILE_DISK', 'public'),
+        'disk' => 'public',
         'folder' => 'attachments',
         'prefix' => 'File',
         'max_size' => 10240, // 10MB
