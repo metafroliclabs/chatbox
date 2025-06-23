@@ -23,6 +23,7 @@ class ChatUserService extends BaseService
     public function add_users($userIds, $id)
     {
         $authId = auth()->id();
+        $maxUsers = config('chat.group.max_users', 9);
 
         // Fetch the chat and ensure the user is part of it
         $chat = Chat::where('type', Chat::GROUP)
@@ -51,6 +52,11 @@ class ChatUserService extends BaseService
                 'created_at' => now(),
                 'updated_at' => now()
             ];
+        }
+
+        // Max users check
+        if ((count($existingUserIds) + count($userTimestamps)) > $maxUsers) {
+            throw new ChatException("Max {$maxUsers} users are allowed in a group chat.");
         }
 
         if (!empty($userTimestamps)) {
