@@ -18,6 +18,7 @@ class ChatDetailResource extends JsonResource
     {
         $authId = auth()->id();
         $user = $this->users->where('id', '!=', $authId)->first();
+        $authUser = $this->users->where('id', auth()->id())->first();
         $private = ($this->type === Chat::PRIVATE) ? true : false;
 
         $fullname = $this->getUserFullname($user);
@@ -30,6 +31,7 @@ class ChatDetailResource extends JsonResource
             'name' => $this->when($private, $fullname, $this->name),
             'image' => $this->when($private, $avatar, $this->image),
             'unread' => $count,
+            'bg_notification' => $authUser->pivot->bg_notification,
             'created_at' => $this->created_at,
             'setting' => $this->setting,
             'created_by' => $this->createdBy,

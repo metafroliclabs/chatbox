@@ -17,17 +17,17 @@ class MessageSent
     public $chat;
     public $messages;
     public $sender;
-    public $receiver;
+    public $receivers;
 
     /**
      * Create a new event instance.
      */
-    public function __construct($chat, $messages, $sender, $receiver)
+    public function __construct($chat, $messages, $sender, $receivers)
     {
         $this->chat = $chat;
         $this->messages = $messages;
         $this->sender = $sender;
-        $this->receiver = $receiver;
+        $this->receivers = $receivers;
     }
 
     /**

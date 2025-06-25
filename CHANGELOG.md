@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.1] - 2025-06-25
+### Fixed
+- Dispatched `MessageSent` on forward messages
+- Fixed pagination on messages reactions and views
+
 ## [1.3.0] - 2025-06-23
 ### Added
 - Added universal chat type support

@@ -58,7 +58,14 @@ class ChatMessageController extends Controller
     {
         $chat = $this->chatService->get_chat($id);
         $likes = $this->messageService->getMessageLikes($chat, $mid);
-        return $this->response->success(DefaultResource::collection($likes));
+
+        $resource = DefaultResource::collection($likes);
+
+        $result = $this->pagination
+            ? $resource->response()->getData(true)
+            : $resource;
+
+        return $this->response->success($result);
     }
 
     public function like_message($id, $mid)
@@ -72,7 +79,14 @@ class ChatMessageController extends Controller
     {
         $chat = $this->chatService->get_chat($id);
         $views = $this->messageService->getMessageViews($chat, $mid);
-        return $this->response->success(DefaultResource::collection($views));
+
+        $resource = DefaultResource::collection($views);
+        
+        $result = $this->pagination
+            ? $resource->response()->getData(true)
+            : $resource;
+
+        return $this->response->success($result);
     }
 
     public function view_message($id, $mid)

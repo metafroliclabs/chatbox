@@ -1,6 +1,6 @@
 <?php
 
-namespace Metafroliclabs\LaravelChat\Support;
+namespace Metafroliclabs\LaravelChat\Policies;
 
 class ChatAccessPolicy
 {

@@ -10,7 +10,7 @@ use Metafroliclabs\LaravelChat\Models\ChatMessage;
 use Metafroliclabs\LaravelChat\Models\ChatMessageView;
 use Metafroliclabs\LaravelChat\Services\Core\BaseService;
 use Metafroliclabs\LaravelChat\Services\Core\FileService;
-use Metafroliclabs\LaravelChat\Support\ChatAccessPolicy;
+use Metafroliclabs\LaravelChat\Policies\ChatAccessPolicy;
 
 class ChatMessageService extends BaseService
 {
@@ -70,7 +70,7 @@ class ChatMessageService extends BaseService
             // Insert unseen view records
             if (!empty($viewData)) {
                 ChatMessageView::insert($viewData);
-            }   
+            }
             $messages->load('views');
         }
 
@@ -80,12 +80,12 @@ class ChatMessageService extends BaseService
     public function sendMessage($chat, $request)
     {
         $authId = auth()->id();
+        $authUser = auth()->user();
         $setting = $chat->setting;
         $replyId = null;
 
-        $authUser = $chat->users()->where('user_id', $authId)->first();
         $users = $chat->users()->where('user_id', '!=', $authId)->where('bg_notification', true)->get();
-        
+
         if ($chat->type === Chat::GROUP && !$setting->can_send_messages && $authUser->pivot->role !== Chat::ADMIN) {
             throw new ChatException("Only admins are allowed to send messages");
         }
@@ -105,7 +105,13 @@ class ChatMessageService extends BaseService
             $images = $uploaded['data'];
 
             foreach ($images as $key => $image) {
-                $message = $chat->messages()->create(['user_id' => $authId]);
+                $message = $chat->messages()->create([
+                    'type' => ChatMessage::MESSAGE,
+                    'user_id' => $authId,
+                    'replied_to_message_id' => $replyId,
+                    'is_updated' => 0,
+                    'is_forwarded' => 0,
+                ]);
                 $message->attachment()->create($image);
                 $messages[] = $message;
             }
@@ -113,9 +119,12 @@ class ChatMessageService extends BaseService
 
         if ($request->message) {
             $message = $chat->messages()->create([
+                'type' => ChatMessage::MESSAGE,
                 'user_id' => $authId,
                 'message' => $request->message,
-                'replied_to_message_id' => $replyId
+                'replied_to_message_id' => $replyId,
+                'is_updated' => 0,
+                'is_forwarded' => 0,
             ]);
             $messages[] = $message;
         }
@@ -130,7 +139,8 @@ class ChatMessageService extends BaseService
     public function forwardMessages($chat, $request)
     {
         $authId = auth()->id();
-        $forwardedMessages = [];
+        $authUser = auth()->user();
+        $allForwardedMessages = [];
 
         // Fetch all messages to forward (with necessary relations)
         $originalMessages = $chat->messages()
@@ -148,6 +158,7 @@ class ChatMessageService extends BaseService
             ->get();
 
         foreach ($chats as $chatData) {
+            $forwardedMessages = [];
             // Check if the user is allowed to send messages in this chat
             $setting = $chatData->setting;
             $authPivot = $chatData->users()->where('user_id', $authId)->first();
@@ -159,6 +170,9 @@ class ChatMessageService extends BaseService
             ) {
                 continue; // Skip this chat if not allowed
             }
+
+            // Get users for event
+            $chatUsers = $chatData->users()->where('user_id', '!=', $authId)->where('bg_notification', true)->get();
 
             foreach ($originalMessages as $original) {
                 // Create the new forwarded message
@@ -178,11 +192,15 @@ class ChatMessageService extends BaseService
                 }
 
                 $forwardedMessages[] = $newMessage;
+                $allForwardedMessages[] = $newMessage;
             }
+
+            // Fire event for this chat
+            event(new MessageSent($chatData, $forwardedMessages, $authUser, $chatUsers));
         }
         DB::commit();
 
-        return $forwardedMessages;
+        return $allForwardedMessages;
     }
 
     public function getMessageLikes($chat, $mid)
@@ -192,7 +210,11 @@ class ChatMessageService extends BaseService
             ->whereNull('deleted_at')
             ->findOrFail($mid);
 
-        return $message->reactions()->get();
+        $query = $message->reactions()->latest();
+
+        return $this->pagination
+            ? $query->paginate($this->per_page)
+            : $query->get();
     }
 
     public function toggleLike($chat, $mid)
@@ -220,7 +242,11 @@ class ChatMessageService extends BaseService
             ->whereNull('deleted_at')
             ->findOrFail($mid);
 
-        return $message->views()->get();
+        $query = $message->views()->latest();
+
+        return $this->pagination
+            ? $query->paginate($this->per_page)
+            : $query->get();
     }
 
     public function viewMessage($chat, $mid)

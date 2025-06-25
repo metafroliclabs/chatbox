@@ -17,6 +17,7 @@ class ChatResource extends JsonResource
     public function toArray(Request $request): array
     {
         $user = $this->users->where('id', '!=', auth()->id())->first();
+        $authUser = $this->users->where('id', auth()->id())->first();
         $private = ($this->type === Chat::PRIVATE) ? true : false;
 
         $fullname = $this->getUserFullname($user);
@@ -30,6 +31,7 @@ class ChatResource extends JsonResource
             'name' => $this->when($private, $fullname, $this->name),
             'image' => $this->when($private, $avatar, $this->image),
             'unread' => $count,
+            'bg_notification' => $authUser->pivot->bg_notification,
             'last_message' => new ShortMessageResource($message),
             'setting' => $this->setting
         ];

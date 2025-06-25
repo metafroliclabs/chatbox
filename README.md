@@ -6,6 +6,7 @@ A powerful and customizable chat system built for Laravel applications. This pac
 
 ## 🚀 Features
 
+- Dual-mode (standard/universal) design.
 - Private & Group Chat
 - Message types: message, activity
 - User roles: admin, user
@@ -146,15 +147,16 @@ php artisan make:listener HandleMessageSent
 namespace App\Listeners;
 
 use Metafroliclabs\LaravelChat\Events\MessageSent;
+use Illuminate\Contracts\Queue\ShouldQueue;
 
-class HandleMessageSent
+class HandleMessageSent implements ShouldQueue
 {
     public function handle(MessageSent $event)
     {
         $chat = $event->chat;
         $messages = $event->messages;
         $sender = $event->sender;
-        $receiver = $event->receiver;
+        $receivers = $event->receivers;
 
         // Example: Send push notifications or log activity
     }

@@ -5,7 +5,7 @@ namespace Metafroliclabs\LaravelChat\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Metafroliclabs\LaravelChat\Exceptions\ChatException;
-use Metafroliclabs\LaravelChat\Support\ChatAccessPolicy;
+use Metafroliclabs\LaravelChat\Policies\ChatAccessPolicy;
 
 class EnsureChatFeatureAllowed
 {

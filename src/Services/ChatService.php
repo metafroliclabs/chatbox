@@ -372,6 +372,7 @@ class ChatService extends BaseService
             'bg_notification' => !$notification
         ]);
 
+        $chat->load('users');
         return $chat;
     }
 }
