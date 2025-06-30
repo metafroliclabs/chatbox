@@ -12,10 +12,7 @@ class ChatUserService extends BaseService
 {
     public function get_chat_users($id)
     {
-        $chat = Chat::whereHas('users', function ($q) {
-            $q->where('user_id', auth()->id());
-        })
-            ->findOrFail($id);
+        $chat = Chat::withUser(auth()->id())->findOrFail($id);
 
         return $chat->users;
     }
@@ -26,11 +23,7 @@ class ChatUserService extends BaseService
         $maxUsers = config('chat.group.max_users', 9);
 
         // Fetch the chat and ensure the user is part of it
-        $chat = Chat::where('type', Chat::GROUP)
-            ->whereHas('users', function ($q) use ($authId) {
-                $q->where('user_id', $authId);
-            })
-            ->findOrFail($id);
+        $chat = Chat::withUser($authId)->where('type', Chat::GROUP)->findOrFail($id);
 
         // Check if the current user is allowed to add users
         $setting = $chat->setting;
@@ -90,11 +83,7 @@ class ChatUserService extends BaseService
         $authId = auth()->id();
 
         // Find the chat and check if the user is part of it
-        $chat = Chat::where('type', Chat::GROUP)
-            ->whereHas('users', function ($q) use ($authId) {
-                $q->where('user_id', $authId);
-            })
-            ->findOrFail($id);
+        $chat = Chat::withUser($authId)->where('type', Chat::GROUP)->findOrFail($id);
 
         // Check if the authenticated user is an admin
         $authPivot = $chat->users()->where('user_id', $authId)->first();
@@ -137,11 +126,7 @@ class ChatUserService extends BaseService
         $authId = auth()->id();
 
         // Find the chat and check if the user is part of it
-        $chat = Chat::where('type', Chat::GROUP)
-            ->whereHas('users', function ($q) use ($authId) {
-                $q->where('user_id', $authId);
-            })
-            ->findOrFail($id);
+        $chat = Chat::withUser($authId)->where('type', Chat::GROUP)->findOrFail($id);
 
         // Ensure the authenticated user is an admin
         $authPivot = $chat->users()->where('user_id', $authId)->first();

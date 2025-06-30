@@ -22,10 +22,7 @@ class ChatService extends BaseService
     public function get_chat($id)
     {
         $chat = Chat::with('messages.repliedTo')
-            ->whereHas('users', function ($q) {
-                $q->where('user_id', auth()->id());
-            })
-            ->findOrFail($id);
+            ->withUser(auth()->id())->findOrFail($id);
 
         return $chat;
     }
@@ -35,7 +32,7 @@ class ChatService extends BaseService
         $userId = auth()->id();
         $searchTerm = '%' . $request->search . '%';
 
-        $query = Chat::whereHas('users', fn($q) => $q->where('user_id', $userId));
+        $query = Chat::withUser($userId);
 
         // Filter by type
         if ($request->filled('type')) {
@@ -94,9 +91,7 @@ class ChatService extends BaseService
         $userId = auth()->id();
         $searchTerm = '%' . $request->search . '%';
 
-        $query = Chat::whereHas('users', function ($q) use ($userId) {
-            $q->where('user_id', $userId);
-        })
+        $query = Chat::withUser($userId)
             ->whereHas('messages', function ($q) use ($userId) {
                 $q->where('user_id', '!=', $userId)
                     ->where('type', ChatMessage::MESSAGE)
@@ -174,9 +169,7 @@ class ChatService extends BaseService
     {
         $userId = auth()->id();
 
-        $counts = Chat::whereHas('users', function ($q) use ($userId) {
-            $q->where('user_id', $userId);
-        })
+        $counts = Chat::withUser($userId)
             ->whereHas('messages', function ($q) use ($userId) {
                 $q->where('user_id', '!=', $userId)
                     ->where('type', ChatMessage::MESSAGE)
@@ -210,14 +203,8 @@ class ChatService extends BaseService
             throw new ChatException("Trying to create a chat with invalid user id.");
         }
 
-        $chat = Chat::whereHas('users', function ($query) use ($authId) {
-            $query->where('user_id', $authId);
-        })
-            ->whereHas('users', function ($query) use ($userId) {
-                $query->where('user_id', $userId);
-            })
-            ->where('type', Chat::PRIVATE)
-            ->first();
+        $chat = Chat::withUser($authId)->withUser($userId)
+            ->where('type', Chat::PRIVATE)->first();
 
         if ($chat) return $chat;
 
@@ -285,11 +272,7 @@ class ChatService extends BaseService
     {
         $userId = auth()->id();
 
-        $chat = Chat::where('type', Chat::GROUP)
-            ->whereHas('users', function ($q) use ($userId) {
-                $q->where('user_id', $userId);
-            })
-            ->findOrFail($id);
+        $chat = Chat::withUser($userId)->where('type', Chat::GROUP)->findOrFail($id);
 
         // Check if user is admin
         $pivotData = $chat->users()->where('user_id', $userId)->first();
@@ -330,11 +313,7 @@ class ChatService extends BaseService
         $image = null;
         $activityMessages = [];
 
-        $chat = Chat::where('type', Chat::GROUP)
-            ->whereHas('users', function ($q) use ($authId) {
-                $q->where('user_id', $authId);
-            })
-            ->findOrFail($id);
+        $chat = Chat::withUser($authId)->where('type', Chat::GROUP)->findOrFail($id);
 
         $setting = $chat->setting;
         $authPivot = $chat->users()->where('user_id', $authId)->first();
@@ -397,11 +376,7 @@ class ChatService extends BaseService
     {
         $userId = auth()->id();
 
-        $chat = Chat::whereHas('users', function ($q) use ($userId) {
-            $q->where('user_id', $userId);
-        })
-            ->findOrFail($id);
-
+        $chat = Chat::withUser($userId)->findOrFail($id);
 
         $chat->users()->updateExistingPivot($userId, [
             'cleared_at' => now()
@@ -414,10 +389,7 @@ class ChatService extends BaseService
     {
         $userId = auth()->id();
 
-        $chat = Chat::whereHas('users', function ($q) use ($userId) {
-            $q->where('user_id', $userId);
-        })
-            ->findOrFail($id);
+        $chat = Chat::withUser($userId)->findOrFail($id);
 
         $authPivot = $chat->users()->where('user_id', $userId)->first();
         $notification = $authPivot->pivot->bg_notification;
