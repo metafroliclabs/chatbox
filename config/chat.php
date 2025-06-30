@@ -43,7 +43,7 @@ return [
 
     /*
     |-------------------------------------
-    | Users table configurations
+    | Chat users configurations
     |-------------------------------------
     |
     | Specify the column(s) used to retrieve 
@@ -55,6 +55,7 @@ return [
         'name_cols' => ['first_name', 'last_name'],
         'image_col' => 'avatar',
         'enable_image_url' => true,
+        'filters' => []
     ],
 
     /*

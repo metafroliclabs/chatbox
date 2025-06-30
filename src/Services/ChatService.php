@@ -34,40 +34,65 @@ class ChatService extends BaseService
     {
         $userId = auth()->id();
         $searchTerm = '%' . $request->search . '%';
-        $concatName = $this->getNameColumn();
 
-        $query = Chat::whereHas('users', function ($q) use ($userId) {
-            $q->where('user_id', $userId);
-        });
-
-        // Filter by search
-        if ($request->filled('search')) {
-            $query->where(function ($q) use ($searchTerm, $concatName) {
-                $q->where(function ($q2) use ($searchTerm, $concatName) {
-                    $q2->where('type', Chat::PRIVATE)
-                        ->whereHas('users', function ($q3) use ($searchTerm, $concatName) {
-                            $q3->where($concatName, 'like', $searchTerm);
-                        });
-                })->orWhere('name', 'like', $searchTerm);
-            });
-        }
+        $query = Chat::whereHas('users', fn($q) => $q->where('user_id', $userId));
 
         // Filter by type
         if ($request->filled('type')) {
             $query->where('type', $request->type);
         }
 
-        // Order by latest_message if exists, otherwise chats.created_at
+        // Get configured user filters + search
+        $filters = config('chat.user.filters', []);
+        $filters[] = 'search';
+
+        // Determine if any user filter other than 'search' is filled
+        $userFilters = array_filter($filters, fn($f) => $f !== 'search');
+
+        $onlySearchFilled = $request->filled('search') &&
+            !collect($userFilters)->some(fn($f) => $request->filled($f));
+
+        // Apply user-based filtering + search
+        if (collect($filters)->some(fn($f) => $request->filled($f))) {
+            $query->where(function ($q) use ($request, $filters, $searchTerm, $userId, $onlySearchFilled) {
+                $q->where(function ($q2) use ($request, $filters, $searchTerm, $userId) {
+                    $q2->where('type', Chat::PRIVATE)
+                        ->whereHas('users', function ($q3) use ($request, $filters, $searchTerm, $userId) {
+                            $q3->where('user_id', '!=', $userId);
+
+                            foreach ($filters as $filter) {
+                                if (!$request->filled($filter)) {
+                                    continue;
+                                }
+
+                                if ($filter === 'search') {
+                                    $q3->where($this->getNameColumn(), 'like', $searchTerm);
+                                } else {
+                                    $q3->where($filter, $request->$filter);
+                                }
+                            }
+                        });
+                });
+
+                // Allow group chat name search ONLY if no user filters are present
+                if ($onlySearchFilled) {
+                    $q->orWhere('name', 'like', $searchTerm);
+                }
+            });
+        }
+
+        // Order by latest message
         $query->orderByLatestActivity();
 
-        return $this->pagination ? $query->paginate($this->per_page) : $query->get();
+        return $this->pagination
+            ? $query->paginate($this->per_page)
+            : $query->get();
     }
 
     public function get_unread_chat_list($request)
     {
         $userId = auth()->id();
         $searchTerm = '%' . $request->search . '%';
-        $concatName = $this->getNameColumn();
 
         $query = Chat::whereHas('users', function ($q) use ($userId) {
             $q->where('user_id', $userId);
@@ -93,27 +118,56 @@ class ChatService extends BaseService
                     });
             });
 
-        // Apply search filter
-        if ($request->filled('search')) {
-            $query->where(function ($q) use ($searchTerm, $concatName) {
-                $q->where(function ($q2) use ($searchTerm, $concatName) {
-                    $q2->where('type', Chat::PRIVATE)
-                        ->whereHas('users', function ($q3) use ($searchTerm, $concatName) {
-                            $q3->where($concatName, 'like', $searchTerm);
-                        });
-                })->orWhere('name', 'like', $searchTerm);
-            });
-        }
-
         // Apply type filter
         if ($request->filled('type')) {
             $query->where('type', $request->type);
         }
 
+        // Get configured user filters + search
+        $filters = config('chat.user.filters', []);
+        $filters[] = 'search';
+
+        // Determine if any user filter other than 'search' is filled
+        $userFilters = array_filter($filters, fn($f) => $f !== 'search');
+
+        $onlySearchFilled = $request->filled('search') &&
+            !collect($userFilters)->some(fn($f) => $request->filled($f));
+
+        // Apply user-based filtering + search
+        if (collect($filters)->some(fn($f) => $request->filled($f))) {
+            $query->where(function ($q) use ($request, $filters, $searchTerm, $userId, $onlySearchFilled) {
+                $q->where(function ($q2) use ($request, $filters, $searchTerm, $userId) {
+                    $q2->where('type', Chat::PRIVATE)
+                        ->whereHas('users', function ($q3) use ($request, $filters, $searchTerm, $userId) {
+                            $q3->where('user_id', '!=', $userId);
+
+                            foreach ($filters as $filter) {
+                                if (!$request->filled($filter)) {
+                                    continue;
+                                }
+
+                                if ($filter === 'search') {
+                                    $q3->where($this->getNameColumn(), 'like', $searchTerm);
+                                } else {
+                                    $q3->where($filter, $request->$filter);
+                                }
+                            }
+                        });
+                });
+
+                // Allow group chat name search ONLY if no user filters are present
+                if ($onlySearchFilled) {
+                    $q->orWhere('name', 'like', $searchTerm);
+                }
+            });
+        }
+
         // Order by latest_message if exists, otherwise chats.created_at
         $query->orderByLatestActivity();
 
-        return $this->pagination ? $query->paginate($this->per_page) : $query->get();
+        return $this->pagination
+            ? $query->paginate($this->per_page)
+            : $query->get();
     }
 
     public function get_unread_chat_count()
