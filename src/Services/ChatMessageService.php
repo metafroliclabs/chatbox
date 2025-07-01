@@ -151,9 +151,7 @@ class ChatMessageService extends BaseService
 
         DB::beginTransaction();
 
-        $chats = Chat::whereHas('users', function ($q) use ($authId) {
-            $q->where('user_id', $authId);
-        })
+        $chats = Chat::withUser($authId)
             ->whereIn('id', $request->chats)
             ->get();
 
