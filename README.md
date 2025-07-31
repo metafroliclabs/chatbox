@@ -7,12 +7,12 @@ A powerful and customizable chat system built for Laravel applications. This pac
 ## 🚀 Features
 
 - Dual-mode (standard/universal) design.
-- Private & Group Chat
+- Private & Group Chat Support.
 - Message types: message, activity
 - User roles: admin, user
-- Group settings (permissions control)
+- Group settings (all permissions control)
 - Message read/unread tracking
-- Activity messages: group creation, joins, leaves, settings changes
+- Activity messages on: group creation, joins, leaves, settings changes
 - Media upload support
 - Configurable user info: name, avatar
 - Extendable & clean architecture (Service-based)
@@ -51,13 +51,13 @@ Customize settings in `config/chat.php`:
 
 #### 1. Chat type:
 
-You can switch between standard (private/group chat) and universal (global chat):
+You can switch between `standard` (private/group chat) and `universal` (global chat):
 
 ```php
 'type' => 'standard',
 ```
 
-Also in universal type, you can enable/disable some modules:
+Also in universal type, you can enable/disable modules:
 
 ```php
 'features' => [
@@ -68,7 +68,7 @@ Also in universal type, you can enable/disable some modules:
 
 #### 2. Pagination:
 
-Enable or disable pagination:
+You can also enable or disable pagination:
 
 ```php
 'pagination' => true,
@@ -125,7 +125,7 @@ Laravel Chat dispatches events to help you hook into the system and extend funct
 
 #### `Metafroliclabs\LaravelChat\Events\MessageSent`
 
-Dispatched when a message is successfully sent in a chat.
+Dispatched when a message is successfully sent or forwarded in a chat.
 
 #### Event Data:
 
@@ -181,6 +181,44 @@ Then run:
 php artisan event:cache
 ```
 
+## 📡 Custom User Filters
+
+You can customize filters in chat listing apis based on your requirement.
+
+### ⚙️ How to Use
+
+#### Step 1: Create a Filter Class
+
+Create a filter class in your project and extend Laravel Chat base filter class `Metafroliclabs\LaravelChat\Filters\BaseFilter`
+
+```php
+namespace App\Filters;
+
+use Metafroliclabs\LaravelChat\Filters\BaseFilter;
+
+class ChatUserFilter extends BaseFilter
+{
+    protected function applyUserFilters($query): void
+    {
+        // Example:
+        if ($this->request->filled('gender')) {
+            $query->where('gender', $this->request->gender);
+        }
+    }
+
+    protected function hasActiveUserFilters(): bool
+    {
+        return $this->request->filled('gender');
+    }
+}
+```
+
+#### Step 2: Update Config File
+
+```php
+'filter' => \App\Filters\ChatUserFilter::class,
+```
+
 ## 🧠 Usage
 
 #### 📚 API Endpoints
@@ -207,7 +245,7 @@ _Middleware:_ `auth:sanctum` is required.
 | POST   | `/{id}/delete`  | Delete a chat                   |
 | POST   | `/{id}/leave`   | Leave group chat                |
 | POST   | `/{id}/mute`    | Mute/unmute chat                |
-| GET    | `/{id}`         | Chat detail                     |
+| GET    | `/{id}`         | Get chat detail                 |
 
 #### 👥 User Management
 

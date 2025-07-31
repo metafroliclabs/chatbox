@@ -39,44 +39,20 @@ class ChatService extends BaseService
             $query->where('type', $request->type);
         }
 
-        // Get configured user filters + search
-        $filters = config('chat.user.filters', []);
-        $filters[] = 'search';
+        $filterClass = config('chat.filter');
+        if ($filterClass && class_exists($filterClass)) {
+            $filterService = new $filterClass();
+            $query = $filterService->apply($query, $request);
+        }
 
-        
-
-        // Determine if any user filter other than 'search' is filled
-        $userFilters = array_filter($filters, fn($f) => $f !== 'search');
-
-        $onlySearchFilled = $request->filled('search') &&
-            !collect($userFilters)->some(fn($f) => $request->filled($f));
-
-        // Apply user-based filtering + search
-        if (collect($filters)->some(fn($f) => $request->filled($f))) {
-            $query->where(function ($q) use ($request, $filters, $searchTerm, $userId, $onlySearchFilled) {
-                $q->where(function ($q2) use ($request, $filters, $searchTerm, $userId) {
+        if ($request->filled('search')) {
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where(function ($q2) use ($searchTerm) {
                     $q2->where('type', Chat::PRIVATE)
-                        ->whereHas('users', function ($q3) use ($request, $filters, $searchTerm, $userId) {
-                            $q3->where('user_id', '!=', $userId);
-
-                            foreach ($filters as $filter) {
-                                if (!$request->filled($filter)) {
-                                    continue;
-                                }
-
-                                if ($filter === 'search') {
-                                    $q3->where($this->getNameColumn(), 'like', $searchTerm);
-                                } else {
-                                    $q3->where($filter, $request->$filter);
-                                }
-                            }
+                        ->whereHas('users', function ($q3) use ($searchTerm) {
+                            $q3->where($this->getNameColumn(), 'like', $searchTerm);
                         });
-                });
-
-                // Allow group chat name search ONLY if no user filters are present
-                if ($onlySearchFilled) {
-                    $q->orWhere('name', 'like', $searchTerm);
-                }
+                })->orWhere('name', 'like', $searchTerm);
             });
         }
 
@@ -120,42 +96,20 @@ class ChatService extends BaseService
             $query->where('type', $request->type);
         }
 
-        // Get configured user filters + search
-        $filters = config('chat.user.filters', []);
-        $filters[] = 'search';
+        $filterClass = config('chat.filter');
+        if ($filterClass && class_exists($filterClass)) {
+            $filterService = new $filterClass();
+            $query = $filterService->apply($query, $request);
+        }
 
-        // Determine if any user filter other than 'search' is filled
-        $userFilters = array_filter($filters, fn($f) => $f !== 'search');
-
-        $onlySearchFilled = $request->filled('search') &&
-            !collect($userFilters)->some(fn($f) => $request->filled($f));
-
-        // Apply user-based filtering + search
-        if (collect($filters)->some(fn($f) => $request->filled($f))) {
-            $query->where(function ($q) use ($request, $filters, $searchTerm, $userId, $onlySearchFilled) {
-                $q->where(function ($q2) use ($request, $filters, $searchTerm, $userId) {
+        if ($request->filled('search')) {
+            $query->where(function ($q) use ($searchTerm) {
+                $q->where(function ($q2) use ($searchTerm) {
                     $q2->where('type', Chat::PRIVATE)
-                        ->whereHas('users', function ($q3) use ($request, $filters, $searchTerm, $userId) {
-                            $q3->where('user_id', '!=', $userId);
-
-                            foreach ($filters as $filter) {
-                                if (!$request->filled($filter)) {
-                                    continue;
-                                }
-
-                                if ($filter === 'search') {
-                                    $q3->where($this->getNameColumn(), 'like', $searchTerm);
-                                } else {
-                                    $q3->where($filter, $request->$filter);
-                                }
-                            }
+                        ->whereHas('users', function ($q3) use ($searchTerm) {
+                            $q3->where($this->getNameColumn(), 'like', $searchTerm);
                         });
-                });
-
-                // Allow group chat name search ONLY if no user filters are present
-                if ($onlySearchFilled) {
-                    $q->orWhere('name', 'like', $searchTerm);
-                }
+                })->orWhere('name', 'like', $searchTerm);
             });
         }
 
