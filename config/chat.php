@@ -65,6 +65,7 @@ return [
     */
 
     'message' => [
+        'dispatch_events' => true,
         'enable_activity' =>  true,
         'enable_update_time' => true,
         'update_time_limit' => 60, // mins

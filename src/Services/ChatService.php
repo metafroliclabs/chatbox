@@ -43,6 +43,8 @@ class ChatService extends BaseService
         $filters = config('chat.user.filters', []);
         $filters[] = 'search';
 
+        
+
         // Determine if any user filter other than 'search' is filled
         $userFilters = array_filter($filters, fn($f) => $f !== 'search');
 

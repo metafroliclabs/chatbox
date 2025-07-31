@@ -130,8 +130,10 @@ class ChatMessageService extends BaseService
         }
         DB::commit();
 
-        // Calling event for end-user
-        event(new MessageSent($chat, $messages, $authUser, $users));
+        if (config('chat.message.dispatch_events', true)) {
+            // Calling event for end-user
+            event(new MessageSent($chat, $messages, $authUser, $users));
+        }
 
         return $messages;
     }
