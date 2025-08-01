@@ -2,8 +2,6 @@
 
 namespace Metafroliclabs\LaravelChat\Traits;
 
-use App\Models\User;
-
 trait HasUser
 {
     /**
@@ -11,6 +9,7 @@ trait HasUser
      */
     public function user()
     {
-        return $this->belongsTo(User::class);
+        $UserModel = config('chat.user.model', \App\Models\User::class);
+        return $this->belongsTo($UserModel);
     }
 }

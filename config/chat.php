@@ -60,6 +60,7 @@ return [
     */
 
     'user' => [
+        'model' => \App\Models\User::class,
         'name_cols' => ['first_name', 'last_name'],
         'image_col' => 'avatar',
         'enable_image_url' => true,

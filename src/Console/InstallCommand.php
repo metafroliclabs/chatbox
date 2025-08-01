@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Artisan;
 
 class InstallCommand extends Command
 {
-    protected $signature = 'chat:install {--force : Force the installation even if already installed}';
+    protected $signature = 'larachat:install {--force : Force the installation even if already installed} {--migrate : Run migrations automatically without asking}';
     protected $description = 'Install the Laravel Chat package';
 
     public function handle()
@@ -25,8 +25,8 @@ class InstallCommand extends Command
         // $this->publishMigrations();
         $this->runMigrations();
 
-        $this->info('Laravel Chat Package installed successfully!');
-        // $this->info('Please run "php artisan migrate" to create the database tables.');
+        $this->info('✅ Laravel Chat installed!');
+        $this->line('You may now start using the chat APIs. If needed, publish additional assets manually.');
     }
 
     protected function isInstalled()
@@ -56,7 +56,7 @@ class InstallCommand extends Command
 
     protected function runMigrations()
     {
-        if ($this->confirm('Do you want to run the migrations now?', true)) {
+        if ($this->option('migrate') || $this->confirm('Do you want to run the migrations now?', true)) {
             $this->info('Running migrations...');
             $this->call('migrate');
         }
@@ -64,8 +64,11 @@ class InstallCommand extends Command
 
     protected function createStorageLink()
     {
-        // if ($this->confirm('Do you want to create a storage link for file uploads?', true)) {}
-        $this->info('Creating storage link...');
-        $this->call('storage:link');
+        if (!file_exists(public_path('storage'))) {
+            $this->info('Creating storage link...');
+            $this->call('storage:link');
+        } else {
+            $this->info('Storage link already exists.');
+        }
     }
 }

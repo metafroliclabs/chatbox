@@ -24,7 +24,7 @@ composer require metafroliclabs/laravel-chat
 ```
 
 ```bash
-php artisan chat:install
+php artisan larachat:install
 ```
 
 Or, manually publish configuration file:
@@ -97,6 +97,7 @@ Define how user information (name and avatar) is retrieved:
 
 ```php
 'user' => [
+    'model' => \App\Models\User::class,         // Default user model
     'name_cols' => ['first_name', 'last_name'], // Columns to build full name
     'image_col' => 'avatar',                    // Column for profile picture
     'enable_image_url' => true,                 // If true, image will be URL
@@ -183,13 +184,13 @@ php artisan event:cache
 
 ## 📡 Custom User Filters
 
-You can customize filters in chat listing apis based on your requirement.
+You can customize how chat lists are filtered based on user attributes (like gender, role, etc.).
 
 ### ⚙️ How to Use
 
 #### Step 1: Create a Filter Class
 
-Create a filter class in your project and extend Laravel Chat base filter class `Metafroliclabs\LaravelChat\Filters\BaseFilter`
+Create a custom filter class in your project and extend the base filter class provided by Laravel Chat:
 
 ```php
 namespace App\Filters;
@@ -200,10 +201,12 @@ class ChatUserFilter extends BaseFilter
 {
     protected function applyUserFilters($query): void
     {
-        // Example:
+        // Example: Filter users by gender
         if ($this->request->filled('gender')) {
             $query->where('gender', $this->request->gender);
         }
+
+        // You can add more filters here...
     }
 
     protected function hasActiveUserFilters(): bool
@@ -213,7 +216,9 @@ class ChatUserFilter extends BaseFilter
 }
 ```
 
-#### Step 2: Update Config File
+#### Step 2: Register Your Filter Class
+
+In your `config/chat.php` file, register your custom filter class:
 
 ```php
 'filter' => \App\Filters\ChatUserFilter::class,

@@ -2,6 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.0] - 2025-08-01
+### Changed
+- Changed config based user filter to custom user filter class in chat list.
+
 ## [1.3.2] - 2025-06-30
 ### Fixed
 - Fixed chat list logic and filters

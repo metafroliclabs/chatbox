@@ -2,7 +2,6 @@
 
 namespace Metafroliclabs\LaravelChat\Services;
 
-use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Metafroliclabs\LaravelChat\Exceptions\ChatException;
 use Metafroliclabs\LaravelChat\Models\Chat;
@@ -54,7 +53,8 @@ class ChatUserService extends BaseService
 
         if (!empty($userTimestamps)) {
             // Load user names for activity message
-            $addedUsers = User::whereIn('id', array_keys($userTimestamps))->get();
+            $UserModel = config('chat.user.model', \App\Models\User::class);
+            $addedUsers = $UserModel::whereIn('id', array_keys($userTimestamps))->get();
 
             $addedNames = $addedUsers->map(function ($user) {
                 return $this->getFullName($user);
@@ -101,7 +101,8 @@ class ChatUserService extends BaseService
 
         if (!empty($removableUserIds)) {
             // Fetch removed user names
-            $removedUsers = User::whereIn('id', $removableUserIds)->get();
+            $UserModel = config('chat.user.model', \App\Models\User::class);
+            $removedUsers = $UserModel::whereIn('id', $removableUserIds)->get();
 
             $removedNames = $removedUsers->map(fn($user) => $this->getFullName($user))->toArray();
             $actorName = $this->getFullName(auth()->user());

@@ -2,7 +2,6 @@
 
 namespace Metafroliclabs\LaravelChat\Models;
 
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -28,7 +27,8 @@ class Chat extends Model
     // Relations
     public function createdBy()
     {
-        return $this->belongsTo(User::class, 'created_by');
+        $UserModel = config('chat.user.model', \App\Models\User::class);
+        return $this->belongsTo($UserModel, 'created_by');
     }
 
     public function setting()
@@ -38,7 +38,8 @@ class Chat extends Model
 
     public function users()
     {
-        return $this->belongsToMany(User::class, 'chat_users')->withPivot('role', 'bg_notification', 'cleared_at', 'created_at');
+        $UserModel = config('chat.user.model', \App\Models\User::class);
+        return $this->belongsToMany($UserModel, 'chat_users')->withPivot('role', 'bg_notification', 'cleared_at', 'created_at');
     }
 
     // public function users()
